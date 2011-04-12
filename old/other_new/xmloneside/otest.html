@@ -1,0 +1,64 @@
+
+<script type="text/javascript" src="testtables.js"></script>
+
+<script type="text/javascript">
+
+function convert(untreated)
+{
+	untreated = untreated
+			.replace(/\s/g, "") 				//whitespace
+			.replace(/(\d{1,})/g, "|$1|") 		//digit
+			.replace(/\(/g, "|(|") 				//left parentheses
+			.replace(/\)/g, "|)|") 				//right parentheses
+			.replace(/,/g, "|") 				//equals
+			
+			.replace(/P/g, "|P|") 				//permutation
+			.replace(/sum/g, "|sum|") 			//summation
+			.replace(/summation/g, "|sum|")
+			.replace(/cosine/g, "|cos|") 		//cosine
+			.replace(/cos/g, "|cos|")
+			.replace(/arccosine/g, "|arccos|") 	//arccosine
+			.replace(/arccos/g, "|arccos|")
+			.replace(/!/g, "|!|")				//factorial
+			.replace(/\^/g, "|^|")				//exponent
+			.replace(/rt/g, "|rt|") 			//root
+			.replace(/root/g, "|rt|")
+			.replace(/\*/g, "|*|") 				//multiplication
+			.replace(/(\/)/g, "|/|") 			//division
+			.replace(/\+/g, "|+|") 				//addition
+			.replace(/-/g, "|-|") 				//subtraction
+			.replace(/=/g, "|=|") 				//equals
+			;
+
+	untreated = untreated.split("|");
+	for(var i=0; i<untreated.length; i++)
+		if(untreated[i] == "")
+			untreated.splice(i,1);
+	
+	for(var i=0; i<untreated.length; i++)
+	{
+		var x = untreated[i];
+		var y = precedence[untreated[i-1]];
+		if(untreated[i] == "-" && (i==0 || precedence[untreated[i-1]] != undefined))
+		{
+			untreated[i+1] = "-" + untreated[i+1];
+			untreated.splice(i,1);
+		}
+	}	
+	alert(untreated);
+}
+
+function go()
+{
+	var x = 9;
+	var y = x.toString() + " hello";
+	alert(y);
+}
+
+</script>
+<form action="" name="text">
+
+<input type="text" name="i">
+<input type="button" value="Convert" onclick="javascript:convert(document.text.i.value)">
+
+</form>

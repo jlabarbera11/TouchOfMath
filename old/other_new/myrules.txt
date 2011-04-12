@@ -1,0 +1,7 @@
+place ancestor of target on other side, invert target if ancestor invertible and !unary
+
+if mtarget !invertible or unary, splinter and ancestor becomes target. then back to step 1
+
+if parent of target is root, call splinter if !unary or !invertible 
+
+otherwise, copy target on other side and leave children (if parent of target is root)

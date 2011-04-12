@@ -1,0 +1,8 @@
+Thesis on designing a Computer Algebra System for education
+http://www01.alamo.edu/pac/faculty/njurkovic/phd.pdf
+
+Effects of CAS
+http://etd.ohiolink.edu/send-pdf.cgi/Tokpah%2520Christopher.pdf
+
+Postfix Math Q
+http://mathforum.org/library/drmath/view/62929.html

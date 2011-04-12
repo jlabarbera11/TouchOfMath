@@ -1,0 +1,54 @@
+<script>
+
+var arr = new Array();
+arr[0] = 'a';
+arr[1] = 'b';
+arr[2] = 'c';
+arr[3] = '*';
+arr[4] = 'd';
+arr[5] = 'e';
+arr[6] = '+';
+arr[7] = 'g';
+arr[8] = '*';
+arr[9] = '+';
+arr[10] = '+';
+
+function node()
+{
+	this.left = null;
+	this.right = null;
+	this.par = null;
+	this.value = null;
+}
+
+function mathTree()
+{
+	this.root = new node();
+	this.buildTree = function(place) {add(this.root, place)};
+}
+
+function add(root, curr)
+{
+	root.value = arr[curr];
+
+	root.right = new node();
+	if(arr[curr-1] == "+" || arr[curr-1] == "*")
+		curr = add(root.right, curr-1);
+	else
+		root.right.value = arr[--curr];
+	root.right.par = root;
+
+	root.left = new node();
+	if(arr[curr-1] == "+" || arr[curr-1] == "*")
+		curr = add(root.left, curr-1);
+	else
+		root.left.value = arr[--curr];
+	root.left.par = root;
+
+	return curr;
+}
+
+	
+var tree = new mathTree();
+tree.buildTree(arr.length-1);
+</script>

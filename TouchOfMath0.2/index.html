@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link href="style.css" rel="stylesheet" type="text/css" />
+	
+	<title>Touch of Math</title>
+	
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="testtables.js"></script>
+	<script type="text/javascript" src="testconvert.js"></script>
+	<script type="text/javascript" src="testtree.js"></script>
+	<script type="text/javascript" src="testmath.js"></script>
+	<script type="text/javascript" src="display.js"></script>
+	<script type="text/javascript" src="displayTables.js"></script>
+	<script type="text/javascript" src="debugfns.js"></script>
+	
+	<script type="text/javascript">
+		var tree = null;
+		var xmlstring = null;
+		
+		$(document).ready(function(){
+			setTimeout("$(window)[0].scrollTo(0, 0);", 500);
+			
+			$("body").bind("orientationchange", function(event){
+				//alert(window.orientation);
+				
+				$(window)[0].scrollTo(0, 0);
+			});
+			
+			$("#equationInput").keydown(function(event){
+				if(event.which == 13){
+					$("#display").click();
+				}
+			});
+			
+			$("#equationInput").focus();
+			
+			$("#doBackend").click(function(){
+				input = $("#equationInput").attr("value");
+				input = infix_to_postfix(stoa(input));
+				
+				tree = new mathTree();
+				xmlstring = tree.buildTree(input);
+				
+				$("#debug").html(nl2br_js(escapeHTML(xmlstring)));
+			});
+			
+			$("#generate").click(function(){
+				errorOccurred = false;
+				
+				if(tree != null){
+					displayEquation(xmlstring);
+				}else{
+					alert("Tree is null");
+				}
+			});
+			
+			$("#display").click(function(){
+				$("#doBackend").click();
+				
+				errorOccurred = false;
+				
+				if(tree != null){
+					displayEquation(xmlstring);
+					postProcessing();
+					finalize();
+				}else{
+					alert("Tree is null");
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+
+<div id="container">
+	<input type="text" id="equationInput" value="a+b=c" />
+	
+	<button id="doBackend">Backend</button>
+	
+	<button id="generate">Generate</button>
+	
+	<button id="postProcessing">Post Processing</button>
+	
+	<button id="finalize">Finalize</button>
+	
+	<button id="display">Display</button>
+	
+	<div id="equation"></div>
+	
+	<div id="debug"></div>
+	<div id="log" style="display:none; text-align:right; width:100%"></div>
+	<div id="final" style="display:none"></div>
+	
+	<span id="license"><a href="LICENSE">License</a></span>
+
+</div>
+
+</body>
+</html>

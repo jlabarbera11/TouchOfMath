@@ -1,0 +1,17 @@
+Usage:
+
+Check out the code, then open up canvas_test.html
+in your browser.
+
+Input an equation, and mess around. We'd love feedback,
+so leave us some comments over on the blog at 
+http://rcos-touch-of-math.blogspot.com/
+
+You can move terms and operators across an equals sign.
+Also, to use the merge without touch, enter the indices
+of the two terms. For example:
+	1+2+3 = a
+To merge 1+2+3, enter 0 and 4, and click to see it happen.
+On a touch screen, just move your two blocks closer
+together.
+

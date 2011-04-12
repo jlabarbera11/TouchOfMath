@@ -1,0 +1,77 @@
+<html>
+
+<head>
+
+<script type="text/javascript" src="tables.js"></script>
+<script type="text/javascript" src="convert.js"></script>
+<script type="text/javascript" src="tree.js"></script>
+<script type="text/javascript" src="math.js"></script>
+
+<script type="text/javascript">
+
+var blocks = [];
+var moving_blocks = [];
+var tree;
+var prevtrees = [];
+
+var defop = "+";
+
+function begin(input)
+{
+	input = infix_to_postfix(input);
+	
+	tree = new mathTree();
+	tree.buildTree(input);
+	
+	blocks = tree.printTree();
+	
+	var string = "";
+	for(var i=0; i<blocks.length; i++)
+		string = string.concat(blocks[i].value);
+	
+	//src and dest are indices of what has been clicked
+	var src = document.text.src.value;	//DEBUGGING!! Will be found based on position of click in future.
+	var dest = document.text.dest.value;
+	var clicked = blocks[src].value; //DEBUGGING!! Just for display, not needed later
+	
+	down(src);
+	up(src, dest);
+	
+	//DEBUGGING!! Just for display, will not be needed later
+	var movstring = "moving blocks: ";
+	for(var i=0; i<moving_blocks.length; i++)
+		movstring = movstring.concat(moving_blocks[i].value);
+		
+	string = string.concat(" -> ");
+	for(var i=0; i<blocks.length; i++)
+		string = string.concat(blocks[i].value);
+	
+	alert("done: " + "clicked " + clicked + "\n" + movstring + "\n" + string);
+	string="";
+	//END DEBUGGING!!
+}
+
+</script>
+
+</head>
+
+<body>
+
+<form action="" name="text"> 
+Equation:<input type="text" name="input1"/> (ex: a+b=c)<br/>
+Source:<input type="text" name="src" length=1> (To move the a, enter a 0 here. To move the b, enter a 2.)<br/>
+Destination:<input type="text" name="dest" length=1> (Over which term the a will end up)<br/>
+<input type="button" value="Submit" onclick="javascript:begin(document.text.input1.value);" />
+</form>
+
+Bugs:<br/>
+Clicking the = sign will cause the program to fail.<br/>
+a+b=c -> (a+b)-c=0<br/>
+No support for custom invertible functions<br/>
+Cx=y ->movement should only be C when clicked, not Cx<br/>
+
+<!--If you find any more add them above-->
+
+</body>
+
+</html>

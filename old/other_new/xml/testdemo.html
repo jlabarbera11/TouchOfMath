@@ -1,0 +1,71 @@
+<html>
+
+<head>
+
+<script type="text/javascript" src="testtables.js"></script>
+<script type="text/javascript" src="testconvert.js"></script>
+<script type="text/javascript" src="testtree.js"></script>
+<script type="text/javascript" src="testmath.js"></script>
+<script type="text/javascript" src="debugfns.js"></script>
+
+<script type="text/javascript">
+
+var tree;
+var prevtrees = [];
+var numnodes = 0;
+
+var defop = "+";
+
+function begin(input)
+{
+	input = infix_to_postfix(input);
+	
+	tree = new mathTree();
+	tree.buildTree(input);
+	
+	var xmlstring = tree.printTree();
+	//To replace the < and > with &lt; and &gt;, then replace newlines with breaks
+	//Not needed when xml isnt displayed
+	xmlstring = escapeHTML(xmlstring);
+	xmlstring = nl2br_js(xmlstring);
+	document.getElementById("initial").innerHTML = "Initial:<br/\>" + xmlstring;
+
+	
+	var num = document.text.pos.value;	//DEBUGGING!! Will be found based on position of click in future.	
+	
+	//simulate mouse and and mouse up events
+	down(num);
+	up(num);
+	
+	xmlstring = tree.printTree();
+	xmlstring = escapeHTML(xmlstring);
+	xmlstring = nl2br_js(xmlstring);
+	document.getElementById("final").innerHTML = "Final:<br/\>" + xmlstring;
+
+}
+</script>
+
+<style type="text/css">
+table.xmloutput td {vertical-align:top; padding:50px}
+</style>
+
+</head>
+
+<body>
+
+<form action="" name="text"> 
+Equation:<input type="text" name="input1"/> (ex: a+b=c)<br/>
+Index:<input type="text" name="pos" length=1> (This is the index field)<br/>
+<input type="button" value="Submit" onclick="javascript:begin(document.text.input1.value);" />
+</form>
+
+<table class="xmloutput">
+<tr>
+<td id="initial"></td>
+<td id="final"></td>
+</tr>
+</table>
+
+</body>
+
+</html>

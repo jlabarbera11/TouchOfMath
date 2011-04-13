@@ -88,8 +88,8 @@ function down(idx)
 //l is index of term immediately left, not including parentheses
 //r is index of term immediately right
 {
-	//if(document.getElementById("final").innerHTML.length)
-		//document.getElementById("initial").innerHTML = document.getElementById("final").innerHTML;
+	if(document.getElementById("final").innerHTML.length)
+		document.getElementById("initial").innerHTML = document.getElementById("final").innerHTML;
 	touchcount++;
 	save_prev();
 	
@@ -109,7 +109,7 @@ function down(idx)
 	//will eventually be
 	//return tree.getMoving(targetm[t], 0, lshift);
 	var xmlstring = tree.getMoving(targetm[t], 0, lshift);
-	//document.getElementById("log").innerHTML += ("moving :<br/>" + filter_xml(xmlstring) + "<br/>");
+	document.getElementById("log").innerHTML += ("moving :<br/>" + filter_xml(xmlstring) + "<br/>");
 	return xmlstring;
 }
 
@@ -176,7 +176,7 @@ function up(idx, des)
 	
 	if(touchcount == 0)
 	{
-		//document.getElementById("log").innerHTML += "Invalid up<br/>";
+		document.getElementById("log").innerHTML += "Invalid up<br/>";
 		return;
 	}
 		
@@ -204,7 +204,7 @@ function up(idx, des)
 	//will eventually be
 	//return tree.update();
 	var xmlstring = tree.update();
-	//document.getElementById("final").innerHTML = filter_xml(xmlstring);
+	document.getElementById("final").innerHTML = filter_xml(xmlstring);
 	return xmlstring;
 }
 
@@ -300,6 +300,7 @@ function traverse(t)
 				for(var j=0; j<targetm[t].children.length; j++)
 				{
 					n.children.push(targetm[t].children[j]);
+					targetm[t].children[j].par = n;
 					n.children[n.children.length-1].inverted = 1 - n.children[n.children.length-1].inverted;
 				}
 		}
@@ -365,7 +366,7 @@ function undo()
 	//will eventually be
 	//return tree.update();
 	var xmlstring = tree.update();
-	//document.getElementById("final").innerHTML = filter_xml(xmlstring);
+	document.getElementById("final").innerHTML = filter_xml(xmlstring);
 	return xmlstring;
 }
 

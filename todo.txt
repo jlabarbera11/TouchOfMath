@@ -1,9 +1,0 @@
-Fix non-moving division line and parentheses
-
-Multitouch
-	-grabbing more than one thing at once
-	-call up on everything selected when one is released
-
-Fix firefox division bug (a + b) / c = d
-
-Add non-semantic subscripts

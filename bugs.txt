@@ -1,6 +1,0 @@
-10 - 4 - 2 = a
-2 over 10
-
-// V----------Reported-by-Zach---------V
-
-(a + b) / c = d	// move the "+" over and then move it back, the original left side of the equation becomes inverted and then the backend stops working

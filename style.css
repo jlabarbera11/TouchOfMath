@@ -1,4 +1,5 @@
-body{
+body
+{
 	/*font-family:sans-serif;*/
 	font-family:times, serif;
 	margin:0px;
@@ -10,27 +11,36 @@ body{
     /*font-family:inherit;*/
 }
 
-#container{
+#container
+{
 	position:absolute;
 	width:98%;
 	height:98%;
 	margin:0px;
 	padding:0px;
 }
-#equation{
+
+#equation
+{
 	margin-top:20px;
 	font-size:40pt;
 }
-#doBackend, #generate, #postProcessing, #finalize{
+
+#doBackend, #generate, #postProcessing, #finalize
+{
 	/*display:none;*/
 }
-#debug{
+
+#debug
+{
 	/*display:none;*/
 	position:absolute;
 	bottom:30px;
 	z-index:-10;
 }
-#license{
+
+#license
+{
 	position:absolute;
 	bottom:5px;
 	width:100%;
@@ -38,7 +48,8 @@ body{
 	text-align:center;
 }
 
-.clickable{
+.clickable
+{
 	padding:2px;
 	margin:0px;
 	padding-left:3px;
@@ -46,32 +57,46 @@ body{
 	font-size:100%;
 	cursor:pointer;
 }
-.clickable:hover{
+
+.clickable:hover
+{
 	border:1px solid #000000;
 }
-.parentheses{
+
+.parentheses
+{
 	cursor:default;
 }
-.operator{
+
+.operator
+{
 	padding-left:12px;
 	padding-right:10px;
 }
-.operatorDivision > .operator{		/*  Division operator  */
+
+.operatorDivision > .operator		/*  Division operator  */
+{
 	/*margin-right:-.5em;*/
 }
-.parameterDivision0{		/*  Numerator  */
+
+.parameterDivision0		/*  Numerator  */
+{
 	margin:0px;
 	position:relative;
 	top:-.65em;
 	font-size:100%;
 }
-.parameterDivision1{		/*  Denominator  */
+
+.parameterDivision1		/*  Denominator  */
+{
 	margin:0px;
 	position:relative;
 	top:.65em;
 	font-size:100%;
 }
-.parameterDivision2{		/*  Line between numerator and denominator  */
+
+.parameterDivision2		/*  Line between numerator and denominator  */
+{
 	display:inline;
 	padding:0px;
 	padding-left:2px;
@@ -83,101 +108,134 @@ body{
 	height:2px;
 }
 
-
-.operatorSum > .operator{		/*  Sum operator  */
+.operatorSum > .operator		/*  Sum operator  */
+{
 	/*margin-right:-.5em;*/
 }
-.parameterSum0{			/*  Operation  */
+
+.parameterSum0			/*  Operation  */
+{
 	margin:0px;
 	position:relative;
 	font-size:100%;
 }
-.parameterSum1{			/*  Start value  */
+
+.parameterSum1			/*  Start value  */
+{
 	margin:0px;
 	position:relative;
 	top:1.25em;
 	font-size:40%;
 }
-.parameterSum2{			/*  End value  */
+
+.parameterSum2			/*  End value  */
+{
 	margin:0px;
 	position:relative;
 	top:-2em;
 	font-size:40%;
 }
 
-.operatorPower > .operator{		/*  Power operator  */
+.operatorPower > .operator		/*  Power operator  */
+{
 	/*display:none;*/
 }
-.parameterPower0{			/*  Base  */
+
+.parameterPower0			/*  Base  */
+{
 	margin:0px;
 	margin-right:-.1em;
 }
-.parameterPower1{			/*  Exponent  */
+
+.parameterPower1			/*  Exponent  */
+{
 	margin:0px;
 	font-size:50%;
 }
 
-.parameterParentheses1, .parameterParentheses2{
+.parameterParentheses1, .parameterParentheses2
+{
 	cursor:default;
 	font-family:sans-serif
 }
 
 
 /* iphone portrait */
-@media screen and (min-width: 320px) and (max-width: 320px){
-	body{
+@media screen and (min-width: 320px) and (max-width: 320px)
+{
+	body
+	{
 		height: 406px;	/*416*/
 		margin:0px;
 		padding:5px;
 	}
-	#container{
+	
+	#container
+	{
 		position:relative;
 	}
 }
+
 /* iphone landscape */
-@media screen and (min-width: 480px) and (max-width: 480px){
-	body{
+@media screen and (min-width: 480px) and (max-width: 480px)
+{
+	body
+	{
 		height: 259px;	/*269*/
 		margin:5px;
 		padding:0px;
 	}
-	#container{
+	
+	#container
+	{
 		position:relative;
 	}
 }
 
 /* ipad landscape */
-@media screen and (min-width: 1024px) and (max-width: 1024px) {
-	body {
+@media screen and (min-width: 1024px) and (max-width: 1024px)
+{
+	body
+	{
 		height: 681px;	/*691*/
 		margin:5px;
 		padding:0px;
 	}
-	#container{
+	
+	#container
+	{
 		position:relative;
 	}
 }
 
 /* ipad portrait */
-@media screen and (min-width: 768px) and (max-width: 768px) {
-	body {
+@media screen and (min-width: 768px) and (max-width: 768px)
+{
+	body
+	{
 		height: 937px;	/*947*/
 		margin:5px;
 		padding:0px;
 	}
-	#container{
+	
+	#container
+	{
 		position:relative;
 	}
 }
 
 /* retina! */
-@media screen and (-webkit-min-device-pixel-ratio: 2) {
-	body {
+@media screen and (-webkit-min-device-pixel-ratio: 2)
+{
+	body
+	{
 		font-family: "Helvetica Neue", sans-serif;
 		/*background-image: url('wallpaper-retina.jpg');
 		background-size: 480px 480px;*/
 	}
-	#container{
+	
+	#container
+	{
 		position:relative;
 	}
 }

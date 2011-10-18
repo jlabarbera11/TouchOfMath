@@ -1,0 +1,71 @@
+<html>
+
+<head>
+<script type="text/javascript" src="tables.js"></script>
+<script type="text/javascript">
+
+function infix_to_postfix(input)
+{
+	var output = [];
+	var opstack = [];
+
+	for(var i=0; i<input.length; i++)
+	{
+        if(input[i] == '(')
+            opstack.push(input[i]);
+		else if(input[i] == ')' || input[i] == ',')
+		{
+			while(opstack[opstack.length-1] != '(')
+			{
+				output.push(opstack[opstack.length-1]);
+				opstack.pop();
+			}
+			if(input[i] == ')')	
+				opstack.pop();
+		}
+		else if(precedence[input[i]] == undefined)
+			output.push(input[i]);
+		else
+		{
+			//This is where associativity matters. Right associativity should
+			//pop everything, including the same operator, where left associativity
+			//or no associtivity will not.
+			if(assoc[input[i]] == 2) //Right associative
+				while(opstack.length && precedence[opstack[opstack.length-1]] > precedence[input[i]])
+				{
+					output.push(opstack[opstack.length-1]);
+					opstack.pop();
+				}
+			else
+				while(opstack.length && precedence[opstack[opstack.length-1]] >= precedence[input[i]])
+				{
+					output.push(opstack[opstack.length-1]);
+					opstack.pop();
+				}
+			opstack.push(input[i]);
+		}
+	}
+
+	while(opstack.length)
+	{
+		output.push(opstack[opstack.length-1]);
+		opstack.pop();
+	}
+
+	return output;
+}
+
+function start(input)
+{
+	var output = infix_to_postfix(input);
+	
+	document.getElementById("output").innerHTML = output;
+}
+</script>
+</head>
+
+<form action="" name="text"> 
+<h3>Infix->Postfix</h3> 
+<textarea name="input1"></textarea><br /> 
+<input type="button" value="Submit" onclick="javascript:start(document.text.input1.value);" /> 
+<div id="output"></div>

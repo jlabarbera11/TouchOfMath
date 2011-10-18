@@ -1,0 +1,19 @@
+TODO:
+	1) Rotation across two +
+	
+		a = b  + c + d
+
+	2)		
+		Go through different algebraic rules.
+	
+		What about unary operators?
+			-a, -b etc
+		
+		What about simplification?
+			a + 0 = a
+			a - a = 0
+		
+
+		Try rules that require rotation
+	
+		Try rules with symmetry

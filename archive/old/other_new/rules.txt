@@ -1,0 +1,46 @@
+﻿There are two targets that are essential to movement:
+	Target, which is what has been clicked
+	Movement Target(mtarget), which is the node highest on the tree 	that will be moved
+
+Ancestor is the highest node below the root.  For example:
+	a+b=c
+	If b is clicked, then the + sign becomes ancestor
+
+mtarget is determined by the following rules:
+	-If target is ancestor, then mtarget = target. If target is invertible 	and unary, use it alone. 
+		-This is due to the fact that the target must move.  Most of the 			time, everything below it will move as well.  However, in the 			case of invertible unary operators, such as trig 	functions, only 		the operator should traverse an equals sign.
+	-If ancestor is invertible and not unary look at associativity.  If target is 	left and ancestor is  left-associative, or vice versa, then use next down
+		-Example: a+b!=c. If the b, or !, are target, the + above it is 			invertible.  The target can be placed on the other side.
+		-Example: a^b=c. If a is selected, the entire left side must move. 		However, when b is selected, since ^ is invertible, it can be placed 		on the left by itself.
+		-Example: a+b*c.  If b or c is target, its ancestor is 	
+		+. Since below the ancestor is *, also an invertible and !unary 			operator, this function cannot be recursive.
+	-Else use ancestor
+
+So to traverse an equals sign, these rules follow:
+	
+If parent of target is root, and target is unary and invertible, copy on other side and leave children
+[ [['T','L'], '=', 'R'] ,'>>', ['L', '=', ['P','R']] ]
+P is T's inverse.
+ex: cos(x) = y >> x = arccos(y) **cos is selected**
+
+If parent of target is root, and first step isn't called, insert a default operator and identity
+[ [['LL', 'T', 'LR'] '=', 'R'], '>>', ['I', 'D', ['LL', 'T', 'LR'], '=', 'R'] ]
+where D is a “default operator,” and I is its identity.
+D is defined by the user's motion, and will most likely be + or *
+From here the fourth rule should be followed. 
+Ex: a+b=c >> 0 + (a+b) = c (after fourth rule, expression will be 0 = c-(a+b))
+Ex: a+b = c >> a+b = 0+c since c is not invertible or unary
+
+If ancestor is unary or not invertible, insert a default operator and identity    
+[ [['O','T'], '=', 'R'] '>>' ['I', 'D', ['O','T'], '=', 'R'] ]
+This is much like the third rule, only that an ancestor has not been selected.
+The fourth rule should be followed after this
+ex: cos(x) = y >> 0 + cos(x) = y (after fourth rule, 0 = c-cos(x)) **x is selected**
+
+Place inverse of ancestor on other side, R becomes ancestors left, and target becomes ancestor's right
+[ [['LL', 'O', 'T',] '=', 'R'] '>>', ['LL', '=', ['R', 'P', 'T']] ]
+[ [['T', 'O', 'LR',] '=', 'R'] '>>', ['LR', '=', ['R', 'P', 'T']] ]
+
+	
+
+		

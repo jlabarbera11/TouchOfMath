@@ -1,0 +1,27 @@
+<<<<<<< HEAD
+
+errors:
+
+1) right to left swap error
+c = a*b
+drag a over to left of = sign, fails!
+
+2) division error
+a*b = c
+a = c / b
+a/c = 1/b
+(a/c)*b = 1
+b = 1/ a/ c
+b/a = 1/1/c <--- oops
+
+3) subtraction
+input: a-(b-c)=e
+
+drag the b over
+
+4) a+b+c = d
+grab the second +, then a and merge it
+
+=======
+??
+>>>>>>> 7c9879b8b8d4933489f1c78b2a5b9bceb1fafb19

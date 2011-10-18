@@ -1,0 +1,184 @@
+So, how does it work?
+
+There are two components. The first matches expressions,
+the second generates them. The idea is to come up with an expression,
+push it through the generator, and pull out a valid result that matches
+some goal expression.
+
+A rule looks like this. 
+[ ['L','=','R'], ">>", ['R', '=', 'L'] ],
+[ Pattern, ">>", Replacement ],
+
+
+
+
+-==-=-=-=-=-=-=-
+
+The first, and simple component, is a wildcard tree.
+The wildcard tree lets you match expressions against a tree.
+
+This is performed through this function:
+
+1. function satisfies(Expr, Goal)
+
+Expr is a binary tree node. It may have a left child and a right child.
+Goal is a wildcard binary tree. It is just like any binary tree, but
+by some convention, some nodes hold a value of "*any*". The "*any*" value
+means anything goes there. 
+
+The satisfies() function will return true if Goal matches an Expr. Otherwise,
+it returns false. 
+
+The implementation is done by recursively checking possibilities for matches.
+It can be done in about 30 lines of javascript, and the function was commented
+heavily to point out the different edge cases. There are a bunch related
+to shifting the Goal Expr or Expr first, and the left or right child. But these
+were easy to flesh out recursively.
+
+-=-=-=-=-=-=-=-=-
+
+Okay, now comes the second part. Generating expressions. This is done
+using a breadth first search that does one rule-based mutation at a time. 
+The mutation is done in a 3-step process.
+
+Part 1
+ function transform_expression(Expr, Rule)
+
+FThis function visits every node in the Expr Tree recursively.
+At each visit, it attempts to bind the rule to the expr. This is done
+through match_and_bind(Expr, Pattern). And finally, it attempts to perform
+the actual substitution via mutate_with_binding(Bindings, Replace)
+
+Part 2
+ function match_and_bind(Expr, Pattern)
+
+The grunt work is done by do_bind(Expr, Pattern, Hash)
+
+Hash is used as a key-value store for mapping variables
+from the Pattern into values from the Expr. For example,
+ ["L", "=", "R"]   vs ["a","=","b"]
+Here, hash["L"] = "a"
+	  hash["R"] = "b"
+	  hash["="] = "="
+	
+Note that if an unknown operator is going to happen in the Replacement part of the rule,
+that operator won't be there. Like a=b+c to a-b=c, there is
+no "-" that can be binded. A hack for this will be mentioned later
+
+do_bind() recursively goes through the Pattern and attempts to bind variables.
+If an operator is encountered in the Expr being binded, it MUST match the Pattern.
+
+
+Part 3
+ function mutate_with_binding(Binding, Replacement)
+
+The grunt work here is done by do_mutate(Mutant, Binding, Replacement)
+Mutant is where the new expr tree is being built.
+Binding is where the bindings are being stored.
+Replacement is the replacement rule
+
+The do_mutate() function recursively traverses the Replacement rule. This recursive
+traversal is done in parallel with the new Mutant Expr, thereby populating it with
+values from the Bindings. 
+
+A hack also happens here for unbounded operators:
+/* create a binding for operators, even if they werent bound 
+  this allows inverting rules, etc
+*/
+if(!Binding[Replacement[1]] && isOp(Replacement[1]))
+  Binding[Replacement[1]] = Replacement[1];
+
+
+The most confusing part of this function is that it uses javascript's dynamic scoping
+features.
+
+
+-=-=-=-=-=-
+The glue.
+
+
+To make sure only valid rules happen, some auxiliary functions make sure
+to only return a binding when ALL non-operator terminals in a rule were matched. 
+In addition, this check is also done before Replacements.
+
+Now, to make this all work, we return back to transform_expression()
+The mutations may occur at any operator on the expression tree. Looking back
+at the transform_expression() function, you can see that new expressions are merged
+back with a copy of the parent.
+
+//try to bind to each possible node in the expression
+if(Expr.left){
+  ret = transform_expression(Expr.left, Rule);
+  for(i = 0; i < ret.length; i++)  {
+    expr_copy = copy_node(Expr);
+    expr_copy.left = ret[i];
+    Transforms.push(expr_copy);
+  }
+}
+
+
+And the final glue is your standard breadth first search
+
+/*
+ N-> Target node
+ Goal-> Abstract Goal
+*/
+
+function bfs(N, Goal)
+{
+ Q = [N]
+
+ console.log("**************Start expr:" + dump_expr(N)+"*************");
+ //initialize transform history
+ delete transform_history;
+ transform_history = new Array();
+
+ is_new_transform(N);
+ 
+ while(Expr = QPop(Q)) {
+   console.log("popped->" + dump_expr(Expr));
+   if(satisfies(getroot(Expr), Goal)){
+     console.log("satisfied goal");
+     return Expr;
+   }
+   for(var i = 0; i < rules.length; i++) {
+    var ret = transform_expression(Expr, rules[i]);
+    for(j = 0; ret && j < ret.length; j++){
+      if(!is_new_transform(ret[j]))
+        continue;
+      console.log("got new transform->" + dump_expr(ret[j]) + ' from ' + dump_expr(Expr) + '  using ' + rules[i]);
+      Q.push(ret[j]); 
+    }
+   }
+ }
+ 
+ return null;
+}
+
+==============================================
+==============================================
+==============================================
+
+What's left?
+
+Solid rules. 
+
+Rigorous testing.
+
+Minimization rules. 
+
+A quicker way of making wildcard rules.
+-=-=-=-
+What's next:
+
+Defining which rules are enabled by which gestures,
+Defining how Expr goals are generated based on these gestures
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+<html>
+<script src="tree.js"></script>
+<script src="convert.js"></script>
+<script src="rules.js"></script>
+<script src="go.js"></script>
+<body>
+</body>
+<script>
+infix = infix_to_postfix(['a','=','b','+','c','+','d'])
+___tree = new mathTree();
+___tree.buildTree(infix, infix.length-1);
+output = ___tree.printTree();
+
+function printString(nodes)
+{
+	var x = "";
+	for(var i = 0; i < nodes.length;i++)
+	{
+		x += nodes[i].value;
+	}
+	return x;
+}
+
+lg = new node('=');
+addleft(lg,'*any*');
+addright(lg,'*any*');
+addright(lg.left,'d');
+lg1 = lg;
+lg = new node('=');
+addleft(lg,'*any*');
+addright(lg,'*any*');
+addleft(lg.left,'*any*');
+addleft(lg.left.left, 'a');
+lg2 = lg;
+lg = new node('=');
+addleft(lg,'*any*');
+addright(lg,'*any*');
+addright(lg.right,'b');
+lg3 = lg;
+ret = bfs(___tree.root, [lg1,lg2,lg3]);
+
+//*/
+document.body.innerHTML="done " + (new Date()).getSeconds() + "<br/>" + dump_expr(___tree.root) + "=>" + dump_expr(ret);
+</script>
+</html>

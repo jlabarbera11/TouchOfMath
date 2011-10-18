@@ -1,0 +1,85 @@
+<html>
+
+<head>
+
+<script type="text/javascript" src="testtables.js"></script>
+<script type="text/javascript" src="testconvert.js"></script>
+<script type="text/javascript" src="testtree.js"></script>
+<script type="text/javascript" src="testmath.js"></script>
+<script type="text/javascript" src="debugfns.js"></script>
+
+<script type="text/javascript">
+
+function begin(input)
+{
+	input = infix_to_postfix(stoa(input));
+	
+	tree = new mathTree();
+	var xmlstring = tree.buildTree(input);
+	
+	//To replace the < and > with &lt; and &gt;, then replace newlines with breaks
+	//Not needed when xml isnt displayed
+	document.getElementById("initial").innerHTML = filter_xml(xmlstring);
+	document.getElementById("final").innerHTML = "";
+	document.getElementById("log").innerHTML = "";
+}
+</script>
+
+<style type="text/css">
+td.desc {text-align:right}
+table.xmloutput td {vertical-align:top; padding:50px}
+</style>
+
+</head>
+
+<body>
+
+<form action="" name="text"> 
+<table>
+
+<tr>
+<td class="desc">Equation:</td>
+<td><input type="text" name="input1"/></td>
+<td><input type="button" value="Submit" onclick="javascript:begin(document.text.input1.value);" /> (ex: a+b=c)</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+
+<tr>
+<td class="desc">Index of down:</td>
+<td><input type="text" name="t" length=1></td>
+
+<td><input type="button" value="click" onclick="javascript:down(document.text.t.value);"></td>
+</tr>
+
+<tr><td>&nbsp;</td></tr>
+
+<tr>
+<td class="desc">Index of release:</td>
+<td><input type="text" name="re" length=1></td>
+</tr>
+
+<tr>
+<td class="desc">Index of up:</td>
+<td><input type="text" name="d" length=1></td>
+<td><input type="button" value="release" onclick="javascript:up(document.text.re.value, document.text.d.value);"></td>
+</tr>
+
+<tr>
+<td class="desc"><input type="button" value="undo" onclick="javascript:undo();"></td>
+</tr>
+
+</table>
+</form>
+
+<table class="xmloutput">
+<tr>
+<td id="initial"></td>
+<td id="final"></td>
+</tr>
+
+<tr><td id="log"></td></tr>
+</table>
+
+</body>
+
+</html>

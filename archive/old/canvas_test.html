@@ -1,0 +1,428 @@
+<html>
+<head>
+<title>Graphs</title>
+<!-- https://developer.mozilla.org/en/Canvas_tutorial/Drawing_shapes#Rectangular_shape_example -->
+
+<script type="text/javascript" src="convert.js"></script>
+<script type="text/javascript" src="tree.js"></script>
+<script type="text/javascript" src="math.js"></script>
+<script type="text/javascript">
+
+blocks = [];
+var ctx = null;
+var WIDTH = 0;
+var HEIGHT = 0;
+var MINX = 0;
+var MINY = 0;
+var MAXX = 0;
+var MAXY = 0;
+
+var is_dragging = -1;
+var prevX = -1;
+var prevY = -1;
+var origX=0, origY=0;
+
+var tree_mode=0;
+
+function Block(text) {
+  this.x = 0;
+  this.y = 0;
+  this.width = 50;
+  this.height = 50;
+  this.node = new node();
+  this.node.value = text;
+}
+
+function node_to_block(n)
+{
+  for(i = 0; i < blocks.length; i++){
+    if(blocks[i].node == n)
+      return blocks[i];
+  }
+  return null;
+}
+
+function clear() {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+}
+
+function g2log(val)
+{
+  var x = 2;
+  while(val >= x){
+    x *= 2;
+  }
+  return x;
+}
+function tree_align(node, value) {
+  if(!node) return 0;
+  block = node_to_block(node);
+  block.x = block.width*value*0.7;
+  block.y = block.height*(g2log(value))*0.2;
+  lefties = tree_align(node.left, value*2);
+  righties = tree_align(node.right, value*2+1);
+/*  if(node.value == "c" || node.value == "d"){
+    alert(depth + " " + lefties + " " + righties + " " + value);
+  }
+*/  
+  return lefties+righties+1;
+}
+
+function align_blocks() {
+  var nextX = WIDTH/2 - (blocks.length/2+1)*50;
+  var nextY = HEIGHT/2 - 50;
+  
+  if(tree_mode){
+    root = tree.root;
+    tree_align(root, 1);
+  } else {
+    for (var i = 0; i < blocks.length; i++) {
+      blocks[i].y = nextY;
+      blocks[i].x = nextX;
+      nextX += blocks[i].width + 10;
+    }
+  }
+}
+
+
+function draw()
+{
+  clear();
+  ctx.strokeStyle = '#11e57f';
+  ctx.lineWidth = 1;
+  ctx.font = "20pt Verdana";
+  ctx.fillStyle = 'black';
+
+  for (var i = 0; i < blocks.length; i++) {
+    ctx.strokeRect(blocks[i].x, blocks[i].y,
+                   blocks[i].width,
+                   blocks[i].height);
+    //print the text
+    code = [blocks[i].node.value];
+    for (var j = 0; j < code.length; j++) {
+        ctx.fillText(code[j], blocks[i].x+15, blocks[i].y+j*(blocks[i].height/2)+blocks[i].height/2);
+    }
+  }
+}
+
+function distance(x1,y1,x2,y2){
+  return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
+}
+
+function find_near_block(x,y,excl)
+{  
+  var mini = Number.MAX_VALUE;
+  var best = -1;
+  for(var i = 0; i < blocks.length; i++){
+    if(i == excl) continue;
+    var d = distance(blocks[i].x, blocks[i].y, x, y);
+    if(d < mini){
+      mini = d;
+      best = i;
+    }
+  }
+  return best;
+}
+
+
+function drag_finish(b){
+  if(b < 0) return;
+  
+  block = blocks[b];
+
+  /* did a block just hop onto the other side
+    of the '='? */  
+  n = block.node;
+  // walk up block b's tree until the = sign
+  while(n && n.par != null){
+    if(n.par.value == "="){
+      eq_block = node_to_block(n.par);
+      //compare coordinates
+      if(eq_block.x > block.x ) {
+        //block is now to the right
+        //console.log("= is left; " + eq_block.x + " vs " + (block.x+block.width));
+        if(origX > eq_block.x){
+          //console.log("moved right to left");
+          doswap(n.par, block.node, 0);
+        }
+      } else if(eq_block.x < block.x) {
+        //block is now to the left
+        //console.log("= is right; " + eq_block.x + " vs " + (block.x+block.width));
+        if(origX < eq_block.x){
+          //console.log("moved left to right");
+          doswap(n.par, block.node, 1);
+        }
+      }
+      break;
+    }
+    n = n.par;
+  }
+
+  render_from_tree();
+  if(!tree_mode){
+    if(b != -1){
+      //align block i to the nearest one
+      var near = find_near_block(block.x, block.y, b);
+      if(near != -1){
+          block.y = blocks[near].y;
+      }
+    }
+    fix_x_overlaps();
+  }
+}
+
+function is_overlapping(block_idx) {
+  b = blocks[block_idx];
+  for(var i = 0; i < blocks.length; i++){
+    a = blocks[i];
+    if( (a.x + a.width > b.x && a.x < b.x+b.width)
+        || (b.x + b.width > a.x && b.x < a.x+a.width)){
+      return 1;
+    }
+  }
+  return 0;
+}
+
+function fix_x_overlaps(){
+  
+  for(var i = 0; i < blocks.length; i++){
+    for(var j = 0; j < blocks.length; j++){
+      if(j == i) continue; 
+
+      if( blocks[i].x > blocks[j].x ){
+        b = blocks[i];
+        a = blocks[j];
+      } else {
+        a = blocks[i];
+        b = blocks[j];
+      }      
+      if(a.x+a.width+5 > b.x && a.x+5 < b.x+b.width){
+        overlap = a.x+a.width - b.x;
+        a.x -= overlap/2+10;
+        b.x += overlap/2+10;
+        fix_x_overlaps();
+      }
+    }
+  }
+}
+
+//in: x,y coordinates
+//out: first block at those coordinates
+function find_block(x,y) {
+  x -= MINX;
+  y -= MINY;
+
+  for (var i = 0; i < blocks.length; i++) { 
+    lx = blocks[i].x;
+    rx = blocks[i].width + lx;
+
+    uy = blocks[i].y;
+    dy = (2)*blocks[i].height + uy;
+    //alert( MINX + " " + MINY + " :: " + lx + " " + x + " " + rx + "::" + uy + " " + y + " " + dy )
+    if ((lx <= x && rx >= x) && (uy <= y && dy >= y)) {
+        return i;
+    }
+  }
+
+  return -1;
+}
+
+function ev_canvas(ev) {
+  if (ev.type == "mousemove") {
+    if (is_dragging != -1) {
+      deltaX = ev.layerX - prevX;
+      deltaY = ev.layerY - prevY;
+      blocks[is_dragging].x = deltaX + origX;
+      blocks[is_dragging].y = deltaY + origY;
+      //alert((deltaX+origY) + " " + (deltaY+origY))
+    } else {
+
+    }
+  } else if (ev.type == "mousedown") {
+    //check through and see if the click collides with a code block
+    //if it does, turnon dragging
+    is_dragging = find_block(ev.layerX, ev.layerY)
+    if (is_dragging != -1) {
+      //mouse down on block i, enable dragging
+      prevX = ev.layerX;
+      prevY = ev.layerY;
+      origX = blocks[is_dragging].x;
+      origY = blocks[is_dragging].y;
+    }
+  } else if (ev.type == "mouseup") {
+      drag_finish(is_dragging);
+      is_dragging = -1;
+  } 
+	/* multitouch events */
+	else if (ev.type == "touchmove") {
+	if (is_dragging != -1) {
+		deltaX = ev.touches[0].pageX - prevX;
+		deltaY = ev.touches[0].pageY - prevY;
+		blocks[is_dragging].x = deltaX + origX;
+		blocks[is_dragging].y = deltaY + origY;
+		//alert((deltaX+origY) + " " + (deltaY+origY))
+	}
+  } else if (ev.type == "touchstart") {
+    //check through and see if the click collides with a code block
+    //if it does, turnon dragging
+    is_dragging = find_block(ev.touches[0].pageX, ev.touches[0].pageY);
+    if (is_dragging != -1) {
+      ev.preventDefault();
+      //mouse down on block i, enable dragging
+      prevX = ev.touches[0].pageX;
+      prevY = ev.touches[0].pageY;
+      origX = blocks[is_dragging].x;
+      origY = blocks[is_dragging].y;
+    }
+  }  else if (ev.type == "touchend") {
+      drag_finish(is_dragging);
+      is_dragging = -1;
+  }
+}
+
+function init() {
+    var canvas = document.getElementById('tutorial');
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
+    MINX = canvas.offsetLeft;
+    MINY = canvas.offsetTop;
+    MAXX = MINX+WIDTH;
+    MAXY = MINY+HEIGHT;
+    
+    align_blocks();
+
+	canvas.ontouchstart = ev_canvas;
+	canvas.ontouchend = ev_canvas;
+	canvas.ontouchmove = ev_canvas;
+	canvas.onmousedown = ev_canvas;
+	canvas.onmousemove = ev_canvas;
+	canvas.onmouseup = ev_canvas;
+
+    if (canvas.getContext) {
+        ctx = canvas.getContext('2d');
+        intervalId = setInterval(draw, 20);
+        return intervalId;
+    }
+}
+
+var tree = new mathTree();
+
+/*
+This function updates the infix notation
+to match any updates to the tree.
+*/
+function render_from_tree()
+{
+  var newnodes = tree.printTree();
+  blocks = [];
+  for(var idx = 0; idx < newnodes.length; idx++){
+    var b = new Block(null);
+    b.node = newnodes[idx];
+    blocks.push(b);
+  }
+
+  align_blocks();
+}
+
+
+function go_tree_mode()
+{
+  render_from_tree();
+  var root = tree.root;
+  print_as_tree(root, -1, -2);
+}
+
+function print_as_tree(root, over, up)
+{
+  var root2 = root;
+  while(root2.left)
+  {
+    root2 = root2.left;
+	over++;
+  }
+  var newblock = node_to_block(root);
+  newblock.x += 3*over;
+  newblock.y += 50*up;
+
+  if(root.left)
+ 	print_as_tree(root.left, 0, up+1);
+  if(root.right)
+ 	print_as_tree(root.right, over+1, up+1);
+}
+
+function i_to_p(input) {
+    //convert input into an array of blocks
+    blocks = []
+    for(var idx = 0; idx < input.length; idx++){
+      if(input[idx] == " ") { idx++; }
+      
+      if( isalnum(input[idx]) ) {
+        var token = "";
+        while(idx < input.length){       
+          if(!isalnum(input[idx])) break;
+          token += input[idx++];
+        }
+        blocks.push(new Block(token));
+      }
+        
+      op = operators.indexOf(input[idx]);
+      if(op != -1 || input[idx] == '(' || input[idx] == ')'){
+        blocks.push(new Block(input[idx]));
+      }
+
+    }
+    
+    var post = infix_to_postfix(blocks);
+    var str = "";
+    for(var i = 0; i < post.length; i++){
+      str += post[i].value + " ";
+    }
+    document.getElementById("ret1").innerHTML = str;
+    tree = new mathTree();
+    tree.buildTree(post, post.length-1);
+
+    render_from_tree();
+}
+
+
+
+</script>
+
+<style type="text/css">
+body { margin: 20px;
+       font-family:
+       arial,verdana,helvetica;
+       background: #fff;}
+
+h1 { font-size: 140%;
+    font-weight:
+    normal;
+    color: #036; border-bottom: 1px solid #ccc; 
+    }
+
+canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+pre { float: left;
+      display: block;
+      background: rgb(238,238,238);
+      border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; 
+}
+</style>
+</head>
+
+<body onload="init();">
+<div>
+
+
+<form action="" name="text">
+<h3>Infix->Postfix</h3>
+<textarea name="input1"></textarea><br />
+<input type="button" value="Submit" onclick="javascript:i_to_p(document.text.input1.value);" />
+<input type="button" value="Treemode" onclick="javascript:go_tree_mode();" />
+<div>
+<canvas id="tutorial" width="640" height="512"></canvas>
+</div>
+<div id="ret1"></div>
+</div>
+</body>
+</html>

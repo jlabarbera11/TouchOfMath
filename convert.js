@@ -28,6 +28,7 @@ function first_parse(untreated)
 		.replace(/\(/g, "[(]") 				//left parentheses
 		.replace(/\)/g, "[)]") 				//right parentheses
 		.replace(/,/g, "[,]") 				//comma
+		.replace(/(".*?")/g, "[$1]")		//quoted variable
 		
 		.replace(/P/g, "[P]") 				//permutation
 		.replace(/summation/g, "[sum]")		//summation
@@ -51,8 +52,20 @@ function first_parse(untreated)
 	untreated = untreated.split(/[\[\]]/);
 	for(var i=0; i<untreated.length; i++)
 		if(untreated[i] == "")
-			untreated.splice(i,1);
+			untreated.splice(i--,1);
 	
+	for(var i=0; i<untreated.length; i++)
+		if(untreated[i].search(/".*"/) != -1) {
+			if(untreated[i-1] && precedence[untreated[i-1]] == undefined) {
+				untreated[i-1] = untreated[i-1].concat(untreated[i]);
+				untreated.splice(i--, 1);
+			}
+			if(untreated[i+1] && precedence[untreated[i+1]] == undefined) {
+				untreated[i+1] = untreated[i].concat(untreated[i+1]);
+				untreated.splice(i--, 1);
+			}
+	}
+
 	for(var i=0; i<untreated.length; i++)
 		if(untreated[i] == "-" && (i==0 || precedence[untreated[i-1]] != undefined || untreated[i-1] == ','))
 		{
@@ -107,7 +120,7 @@ function parse_input(untreated)
 		for(var j=0; j<elements.length; j++) {
 			if(j != 0 )
 				parsed = parsed.concat(['*']);
-			parsed = parsed.concat([elements[j].replace(/"/g, '')]);
+			parsed = parsed.concat([elements[j]]);
 		}
 	}
 
@@ -142,7 +155,7 @@ function infix_to_postfix(input)
 			output.push(input[i]);
 		}
 		else if(precedence[input[i]] == undefined)
-			output.push(input[i]);
+			output.push(input[i].replace(/"/g, ''));
 		else
 		{
 			//This is where associativity matters. Right associativity should

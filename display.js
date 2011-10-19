@@ -622,7 +622,25 @@ function parameterToHtml(element)
         elementClass += " parameter" + operatorClassNameCharacters[element.parent().eq(0).attr("type")] + element.index();
     }
     
-    return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + sanitize(element.attr("type")) + "<\/span>";
+    var content = sanitize(element.attr("type"));
+    
+    if(content.indexOf("*") > -1)
+    {
+        content = content.replace(/\*/g, "");
+        elementClass += " constant";
+        //element.attr("contstant", "true");
+    }
+    else
+    {
+        elementClass += " variable";
+    }
+    
+    if(content.indexOf("$") > -1)
+    {
+        content = specialCharacters[content.replace(/\$/g, "")];
+    }
+    
+    return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";
 }
 
 function operatorToHtml(element)

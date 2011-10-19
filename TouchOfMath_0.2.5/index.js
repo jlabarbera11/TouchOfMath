@@ -30,7 +30,7 @@ $(document).ready(function()
         function()
         {
             input = $("#equationInput").attr("value");
-            input = infix_to_postfix(stoa(input));
+            input = parse_input(input);
             
             tree = new mathTree();
             xmlstring = tree.buildTree(input);

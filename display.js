@@ -637,7 +637,16 @@ function parameterToHtml(element)
     
     if(content.indexOf("$") > -1)
     {
-        content = specialCharacters[content.replace(/\$/g, "")];
+        start = content.indexOf("$");
+        
+        if(content.substring(start + 1) in specialCharacters)
+        {
+            content = content.substring(0, start) + specialCharacters[content.substring(start + 1)];
+        }
+        else
+        {
+            content = content.replace(/$/g, "");
+        }
     }
     
     return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";

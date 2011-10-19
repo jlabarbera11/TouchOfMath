@@ -79,4 +79,4 @@ symbols["epsilon"] = 1
 
 var constants = [];
 constants["e"] = 1;
-constants["&pi"] = 1;
+constants["$pi"] = 1;

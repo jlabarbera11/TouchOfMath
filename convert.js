@@ -95,7 +95,7 @@ function parse_input(untreated)
 		var elements = second_parse(untreated[i]);
 		for(var j=0; j<elements.length; j++) {
 			if(symbols[elements[j]] != undefined)
-				elements[j] = '&'.concat(elements[j]);
+				elements[j] = '$'.concat(elements[j]);
 			if(constants[elements[j]] != undefined)
 				elements[j] = '*'.concat(elements[j]);
 			if(j != 0)

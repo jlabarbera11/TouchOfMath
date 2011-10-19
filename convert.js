@@ -49,15 +49,15 @@ function first_parse(untreated)
 
 	untreated = remove_nested_brackets(untreated);
 	untreated = untreated.split(/[\[\]]/);
-
 	for(var i=0; i<untreated.length; i++)
 		if(untreated[i] == "")
-			untreated.splice(i,1);			
+			untreated.splice(i,1);
+	
 	for(var i=0; i<untreated.length; i++)
 		if(untreated[i] == "-" && (i==0 || precedence[untreated[i-1]] != undefined || untreated[i-1] == ','))
 		{
 			untreated[i+1] = "-" + untreated[i+1];
-			untreated.splice(i,1);
+			untreated.splice(i--,1);
 		}
 
 	return untreated;
@@ -77,10 +77,21 @@ function second_parse(untreated)
 
 	untreated = remove_nested_brackets(untreated);
 	untreated = untreated.split(/[\[\]]/);
-
 	for(var i=0; i<untreated.length; i++)
 		if(untreated[i] == "")
-			untreated.splice(i,1);
+			untreated.splice(i--,1);
+
+	for(var i=untreated.length-1; i>=0; i--) {
+		if(untreated[i] == "-" && i+1<untreated.length) {
+			untreated[i] = untreated[i].concat(untreated[i+1]);
+			untreated.splice(i+1, 1);
+		}
+		if(symbols[untreated[i]] != undefined)
+			untreated[i] = '$'.concat(untreated[i]);
+		if(constants[untreated[i]] != undefined)
+			untreated[i] = '*'.concat(untreated[i]);
+	}
+			
 
 	return untreated;
 }
@@ -94,11 +105,7 @@ function parse_input(untreated)
 	for(var i=0; i<untreated.length; i++) {
 		var elements = second_parse(untreated[i]);
 		for(var j=0; j<elements.length; j++) {
-			if(symbols[elements[j]] != undefined)
-				elements[j] = '$'.concat(elements[j]);
-			if(constants[elements[j]] != undefined)
-				elements[j] = '*'.concat(elements[j]);
-			if(j != 0)
+			if(j != 0 )
 				parsed = parsed.concat(['*']);
 			parsed = parsed.concat([elements[j].replace(/"/g, '')]);
 		}

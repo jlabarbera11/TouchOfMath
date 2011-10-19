@@ -10,8 +10,8 @@ var destinationm;
 var presplintered = [];
 var touchcount = 0;
 
-function findnodebyindex(n, index)
 //on first call, n should equal root
+function findnodebyindex(n, index)
 {
 	if(n.index == index)
 		return n;
@@ -46,8 +46,8 @@ function save_prev()
 	prevtrees.push(oldTree);
 }
 
-function findb(root, index)
 //dfs to find the node whose index matches the one clicked
+function findb(root, index)
 {
 	if(root.index == index)
 		return root;
@@ -83,11 +83,11 @@ function findm(b,a)
 	return m;
 }
 
-function down(idx)
 //Assigns target, targetm, and targeta
 //t is index of clicked term
 //l is index of term immediately left, not including parentheses
 //r is index of term immediately right
+function down(idx)
 {
 	if(document.getElementById("final").innerHTML.length)
 		document.getElementById("initial").innerHTML = document.getElementById("final").innerHTML;
@@ -171,9 +171,9 @@ function pre_splinter(t, lshift)
 	}
 }
 
-function up(idx, des)
 //When a click is released, this function will determine
 //what tree manipulations need to happen
+function up(idx, des)
 {
 	var t = Math.floor(idx/100);
 	var d = Math.floor(des/100);
@@ -215,8 +215,8 @@ function up(idx, des)
 	return xmlstring;
 }
 
-function post_splinter(t)
 //When the target node is an targeta, a node must be created above it
+function post_splinter(t)
 {
 	var n = new node();
 	n.value = "+";
@@ -238,9 +238,9 @@ function post_splinter(t)
 	presplintered[t] = 2;
 }
 
-function traverse(t)
 //When an object is moved to the other side of an equals sign, this function is called
 //Only updates the tree, not blocks
+function traverse(t)
 {
 
 	if(target[t] == targeta[t] && arity[targetm[t].value] == 1 && inverse[targetm[t].value] != undefined)
@@ -420,15 +420,6 @@ function evaluate(op, a, b)
 			return a/b;
 	}
 }
-/*function same_term(nodea, nodeb)
-{
-	if(nodea != nodeb)
-		return false;
-	for(var i=0; i<max(nodea.children.length, nodeb.children.length); i++)
-		if(!same_term(nodea.children[i], nodeb.children[i]))
-			return false;
-	return true;
-}*/
 
 function undo()
 {

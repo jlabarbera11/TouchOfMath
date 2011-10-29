@@ -628,7 +628,7 @@ function parameterToHtml(element)
     {
         content = content.replace(/\*/g, "");
         elementClass += " constant";
-        //element.attr("contstant", "true");
+        //element.attr("constant", "true");
     }
     else
     {

@@ -1,7 +1,7 @@
 //	Whether or not the operator and its parameters require unique display settings
 var specialDisplayOperator =
 {
-    "P": true,
+    "P": false,
     "sum": true,
     "cos": true,
     "arccos": true,
@@ -19,6 +19,7 @@ var specialDisplayOperator =
 //	What to display as the operator-literal
 var operatorCharacters =
 {
+    "P": "P",
     "=": "=",
     "*": "&sdot;",
     "/": "/",
@@ -72,6 +73,7 @@ var specialCharacters =
     "Chi": "&Chi;",
     "Psi": "&Psi;",
     "Omega": "&Omega;",
+    
     "alpha": "&alpha;",
     "beta": "&beta;",
     "gamma": "&gamma;",

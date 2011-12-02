@@ -31,6 +31,41 @@ body
 	/*display:none;*/
 }
 
+#variableList
+{
+    position:absolute;
+    right:20px;
+    /*bottom:20px;*/
+    top:20px;
+}
+
+.variableListItem
+{
+    margin-bottom:.5em;
+    text-align:right;
+    font-size:20pt;
+    font-family:times, serif;
+}
+
+.variableListItem > span
+{
+    vertical-align:middle;
+}
+
+.variableListItem > input
+{
+    vertical-align:middle;
+    font-size:inherit;
+    font-family:inherit;
+    width:5em;
+}
+
+.variableListItem > button
+{
+    height:20pt;
+    vertical-align:middle;
+}
+
 #debug
 {
 	/*display:none;*/
@@ -167,6 +202,18 @@ body
 {
 	cursor:default;
 	font-family:sans-serif
+}
+
+.subscript0
+{
+    
+}
+
+.subscript1
+{
+    position:relative;
+    top:.35em;
+    font-size:55%;
 }
 
 

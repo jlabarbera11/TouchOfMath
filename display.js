@@ -1,11 +1,34 @@
 var errorOccurred = false;
 var idPrefix = "i";
+var variableIdPrefix = "v";
+var constantIdPrefix = "c";
+var constantCharacterPrefix = "*";
+var specialCharacterPrefix = "$";
 
 jQuery.fn.reverse =
     function()
     {
         return this.pushStack(this.get().reverse(), arguments);
     };
+
+function XMLtoString(element)
+{	
+    var serialized;
+    
+    try
+    {
+        // XMLSerializer exists in current Mozilla browsers
+        serializer = new XMLSerializer();
+        serialized = serializer.serializeToString(element);
+    } 
+    catch(e)
+    {
+        // Internet Explorer has a different approach to serializing XML
+        serialized = element.xml;
+    }
+    
+    return serialized;
+}
 
 function sanitize(value)
 {
@@ -14,7 +37,14 @@ function sanitize(value)
 
 function parseIndex(value)
 {
-    return value.substring(idPrefix.length);
+    if(value.indexOf(idPrefix) > -1)
+    {
+        return value.substring(idPrefix.length);
+    }
+    else
+    {
+        return "Invalid, missing idPrefix";
+    }
 }
 
 function setPosition(element, left, top)
@@ -166,6 +196,56 @@ function getParentOffset(element)
     return {left: left, top: top};
 }
 
+function populateVariableList(list, element, xml)
+{
+    var variables = element.find(".variable");
+    var constants = element.find(".constant");
+    
+    var output = "";
+    
+    for(h = 0; h < variables.length; h++)
+    {
+        output +=   "<div id='" + variableIdPrefix + variables.eq(h).attr("id") + "' class='variableListItem'>" +
+                        "<span class='value'>" +
+                            variables.eq(h).html() +
+                        "<\/span>" +
+                        "<span>&nbsp=&nbsp<\/span>" +
+                        "<input type='text' />" +
+                        "<button>Substitute</button>" +
+                    "<\/div>";
+    }
+    
+    list.html(output)
+    .find(".variableListItem > button").click(
+        function(event)
+        {
+            var container = $(event.target).parent();
+            var variableId = container.attr("id");
+            
+            if(variableId.indexOf(variableIdPrefix) > -1)
+            {
+                var id = variableId.substring(variableId.indexOf(variableIdPrefix) + variableIdPrefix.length);
+                
+                //$("#equation").find("#" + id).html(sanitize(container.find("input").attr("value")));
+                
+                xml.find("[index='" + parseIndex(id) + "']").attr("type", sanitize(container.find("input").attr("value")));
+                
+                //console.log(XMLtoString(xml[0]));
+                
+                displayEquation(XMLtoString(xml[0]));
+                postProcessing();
+                finalize();
+            }
+            else
+            {
+                alert("Invalid variableId: '" + variableId + "'");
+            }
+        }
+    );
+    
+    
+}
+
 function displayEquation(xml)
 {
     var $xml = $($.parseXML(xml));
@@ -180,6 +260,8 @@ function displayEquation(xml)
     if(!errorOccurred)
     {
         $("#equation").html(output);
+        
+        populateVariableList($("#variableList"), $("#equation"), $xml);
     }
     else
     {
@@ -270,7 +352,33 @@ function displayEquation(xml)
         
         selector = {};
         
-        index = parseIndex($(target).attr("id"));
+        if($(target).attr("id"))
+        {
+            index = parseIndex($(target).attr("id"));
+        }
+        else
+        {
+            var element = $(target).parent();
+            
+            while(element && !element.attr("id"))
+            {
+                element = element.parent();
+            }
+            
+            if(element)
+            {
+                index = parseIndex(element.attr("id"));
+                
+                //$(target).unbind();//"mouseup").unbind("mousemove");
+                //pseudoMouseDown(element[0], pageX, pageY);
+            }
+            else
+            {
+                index = "Invalid: no 'id' attribute";
+                //return;
+            }
+        }
+        
         overIndex = index;
         
         $(target).css({"z-index": 1});
@@ -288,9 +396,16 @@ function displayEquation(xml)
         
         selector[0] = idPrefix + index;
         
-        if(index == "")
+        if(!index)
         {
-            alert("index = \"\" in mousedown");
+            alert("No index");
+            
+            return;
+        }
+        
+        if(index == "" || index.toLowerCase().indexOf("invalid") > -1)
+        {
+            alert("index = \"" + index + "\" in mousedown");
         }
         else
         {
@@ -348,6 +463,8 @@ function displayEquation(xml)
                     },
                     "fast"
                 );
+                
+                $("#" + selector[i]).clearQueue("fx");      // This stops a weird multiple-mouseup animation
             }
         }
         
@@ -624,9 +741,9 @@ function parameterToHtml(element)
     
     var content = sanitize(element.attr("type"));
     
-    if(content.indexOf("*") > -1)
+    if(content.indexOf(constantCharacterPrefix) > -1)
     {
-        content = content.replace(/\*/g, "");
+        eval('content = content.replace(/\\' + constantCharacterPrefix + '/g, "");');
         elementClass += " constant";
         //element.attr("constant", "true");
     }
@@ -635,9 +752,9 @@ function parameterToHtml(element)
         elementClass += " variable";
     }
     
-    if(content.indexOf("$") > -1)
+    if(content.indexOf(specialCharacterPrefix) > -1)
     {
-        start = content.indexOf("$");
+        start = content.indexOf(specialCharacterPrefix);
         
         if(content.substring(start + 1) in specialCharacters)
         {
@@ -645,11 +762,31 @@ function parameterToHtml(element)
         }
         else
         {
-            content = content.replace(/$/g, "");
+            eval('content = content.replace(/' + specialCharacterPrefix + '/g, "");');
         }
     }
     
-    return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";
+    if(content.indexOf("_") > -1)           // Subscript (display only)
+    {
+        content = content.split("_");
+        var output = "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>";
+        
+        for(i = 0; i < content.length; i += 2)
+        {
+            output += "<span class='subscript0'>" + content[i] + "<\/span>";
+            
+            if(content[i + 1])
+            {
+                output += "<span class='subscript1'>" + content[i + 1] + "<\/span>";
+            }
+        }
+        
+        return output + "<\/span>";
+    }
+    else
+    {
+        return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";
+    }
 }
 
 function operatorToHtml(element)
@@ -846,8 +983,8 @@ function finalize()
         function(i)
         {
             // This checks to make sure nothing is sticking up off the top edge of the page. If an
-            // element is sticking off the top edge of the page, the entire equation is moved down until
-            // it is remedied.
+            // element is sticking off the top edge of the page, the entire equation is moved down
+            // until it is remedied.
             
             if($(this).offset().top < minTop)
             {

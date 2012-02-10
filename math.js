@@ -421,16 +421,34 @@ function evaluate(op, a, b)
 	}
 }
 
+function substituteVar(idx, newval)
+{ 
+	var t = Math.floor(idx/100);
+        findnodebyindex(tree.root, t).value = newval;
+
+        return tree.update();
+}
+
 function undo()
 {
 	if(prevtrees.length == 0)
 		return;
 	tree = prevtrees.pop();
 	
-	//will eventually be
-	//return tree.update();
-	var xmlstring = tree.update();
-	document.getElementById("final").innerHTML = sanitize(xmlstring).replace(/\n/g, "<br />");
-	return xmlstring;
+	return tree.update();
 }
 
+function getMostRecent()
+{
+    oldtree = prevtrees[prevtrees.length-1];
+    return oldtree.genXML();
+}
+
+function getOldTrees()
+{
+    prevtreesXML = [];
+    for(i=0; i<prevtrees.length; i++)
+        prevtreesXML.push(prevtrees[i].genXML());
+
+    return prevtreesXML;
+}

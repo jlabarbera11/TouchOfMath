@@ -20,6 +20,7 @@ function mathTree()
 	this.update = function() {assignIndices(this.root, 0); return printtree(this.root, 0, 0)};
 	this.getMoving = function(root, l, t) {return printtree(root, l, t)};
 	this.subtree = function(node) {return subtree(node)};
+        this.genXML = function() {return printtree(this.root, 0, 0)};
 }
 
 function add(root, arr, curr, lev)

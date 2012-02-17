@@ -205,14 +205,20 @@ function populateVariableList(list, element, xml)
     
     for(h = 0; h < variables.length; h++)
     {
-        output +=   "<div id='" + variableIdPrefix + variables.eq(h).attr("id") + "' class='variableListItem'>" +
-                        "<span class='value'>" +
-                            variables.eq(h).html() +
-                        "<\/span>" +
-                        "<span>&nbsp=&nbsp<\/span>" +
-                        "<input type='text' />" +
-                        "<button>Substitute</button>" +
-                    "<\/div>";
+        var regex = /[^0-9]/g;
+        
+        // Don't treat numbers as editable variables
+        if(regex.test(variables.eq(h).html()))
+        {
+            output +=   "<div id='" + variableIdPrefix + variables.eq(h).attr("id") + "' class='variableListItem'>" +
+                            "<span class='value'>" +
+                                variables.eq(h).html() +
+                            "<\/span>" +
+                            "<span>&nbsp=&nbsp<\/span>" +
+                            "<input type='text' />" +
+                            "<button>Substitute</button>" +
+                        "<\/div>";
+        }
     }
     
     list.html(output)
@@ -226,11 +232,11 @@ function populateVariableList(list, element, xml)
             {
                 var id = variableId.substring(variableId.indexOf(variableIdPrefix) + variableIdPrefix.length);
                 
-                //$("#equation").find("#" + id).html(sanitize(container.find("input").attr("value")));
+                var newValue = sanitize(container.find("input").attr("value"));
                 
-                xml.find("[index='" + parseIndex(id) + "']").attr("type", sanitize(container.find("input").attr("value")));
+                var newElement = substituteVar(0, newValue);
                 
-                //console.log(XMLtoString(xml[0]));
+                xml.find("[index='" + parseIndex(id) + "']").attr("type", newValue);
                 
                 displayEquation(XMLtoString(xml[0]));
                 postProcessing();
@@ -242,6 +248,17 @@ function populateVariableList(list, element, xml)
             }
         }
     );
+    
+    list.find(".variableListItem > input").keydown(
+        function(event)
+        {
+            // If the Enter key is presses, act as if the accompanying button was clicked
+            if(event.which == 13)
+            {
+                $(this).nextAll(".variableListItem > button").eq(0).click()
+            }
+        }
+    )
     
     
 }
@@ -477,6 +494,8 @@ function displayEquation(xml)
         if(overIndex != "" && index != overIndex)
         {
             xmlstring = up(index, overIndex);
+            
+            console.log(xmlstring);
             
             errorOccurred = false;
             
@@ -752,7 +771,7 @@ function parameterToHtml(element)
         elementClass += " variable";
     }
     
-    if(content.indexOf(specialCharacterPrefix) > -1)
+    /*if(content.indexOf(specialCharacterPrefix) > -1)
     {
         start = content.indexOf(specialCharacterPrefix);
         
@@ -764,7 +783,7 @@ function parameterToHtml(element)
         {
             eval('content = content.replace(/' + specialCharacterPrefix + '/g, "");');
         }
-    }
+    }*/
     
     if(content.indexOf("_") > -1)           // Subscript (display only)
     {
@@ -773,6 +792,20 @@ function parameterToHtml(element)
         
         for(i = 0; i < content.length; i += 2)
         {
+            if(content[i].indexOf(specialCharacterPrefix) > -1)
+            {
+                start = content[i].indexOf(specialCharacterPrefix);
+                
+                if(content[i].substring(start + 1) in specialCharacters)
+                {
+                    content[i] = content[i].substring(0, start) + specialCharacters[content[i].substring(start + 1)];
+                }
+                else
+                {
+                    eval('content[i] = content[i].replace(/' + specialCharacterPrefix + '/g, "");');
+                }
+            }
+            
             output += "<span class='subscript0'>" + content[i] + "<\/span>";
             
             if(content[i + 1])
@@ -785,6 +818,20 @@ function parameterToHtml(element)
     }
     else
     {
+        if(content.indexOf(specialCharacterPrefix) > -1)
+        {
+            start = content.indexOf(specialCharacterPrefix);
+            
+            if(content.substring(start + 1) in specialCharacters)
+            {
+                content = content.substring(0, start) + specialCharacters[content.substring(start + 1)];
+            }
+            else
+            {
+                eval('content = content.replace(/' + specialCharacterPrefix + '/g, "");');
+            }
+        }
+        
         return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";
     }
 }

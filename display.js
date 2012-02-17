@@ -234,7 +234,7 @@ function populateVariableList(list, element, xml)
                 
                 var newValue = sanitize(container.find("input").attr("value"));
                 
-                var newElement = substituteVar(0, newValue);
+                var newElement = substituteVar(parseIndex(id), newValue);
                 
                 xml.find("[index='" + parseIndex(id) + "']").attr("type", newValue);
                 

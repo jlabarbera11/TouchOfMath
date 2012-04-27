@@ -65,6 +65,7 @@ $(document).ready(function()
             if(tree != null)
             {
                 displayEquation(xmlstring);
+                displayHistory(prevtrees);
                 postProcessing();
                 finalize();
             }

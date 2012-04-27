@@ -422,7 +422,9 @@ function evaluate(op, a, b)
 }
 
 function substituteVar(idx, newval)
-{ 
+{
+    save_prev();
+    
 	var t = Math.floor(idx/100);
         findnodebyindex(tree.root, t).value = newval;
 

@@ -22,8 +22,28 @@ body
 
 #equation
 {
-	margin-top:20px;
+	/*margin-top:20px;*/
 	font-size:40pt;
+	
+	position:absolute;
+	bottom:75px;
+	width:100%;
+	/*text-align:center;*/
+}
+
+#history
+{
+    margin-top:20px;
+	font-size:40pt;
+	color:#808080;
+	
+    position:absolute;
+    top:15px;
+	bottom:150px;
+	overflow:auto;
+	width:100%;
+	/*height:20px;*/
+	/*text-align:center;*/
 }
 
 #doBackend, #generate, #postProcessing, #finalize
@@ -77,10 +97,21 @@ body
 #license
 {
 	position:absolute;
+	left:0px;
 	bottom:5px;
 	width:100%;
 	height:20px;
 	text-align:center;
+}
+
+.historyElement
+{
+    padding:2px;
+	margin:0px;
+	padding-left:3px;
+	padding-right:3px;
+	font-size:100%;
+    cursor:default;
 }
 
 .clickable
@@ -113,7 +144,7 @@ body
 	cursor:default;
 }
 
-.operator
+.operator, .historyOperator
 {
 	padding-left:12px;
 	padding-right:10px;

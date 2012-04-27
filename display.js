@@ -74,7 +74,15 @@ function getWidth(element)
 {
     var width = 0;
     
-    if(element.hasClass("operatorSum"))
+    if(element.attr("id") == "equation")
+    {
+        element.children().each(
+            function(index){
+                width += getWidth($(this));
+            }
+        );
+    }
+    else if(element.hasClass("operatorSum"))
     {
         width = getWidth(element.children(".operator")) + getWidth(element.children(".parameterSum0").eq(0));
         
@@ -105,6 +113,11 @@ function getWidth(element)
         var className = element[0].className
         var startIndex = className.indexOf("operator") + "operator".length;
         var stopIndex = className.indexOf(" ", startIndex);
+        if(stopIndex < 0)
+        {
+            stopIndex = className.length;
+        }
+        
         var operatorType = className.substring(startIndex, stopIndex);
         
         width = getWidth(element.children(".parameter" + operatorType + "0")) + getWidth(element.children(".parameter" + operatorType + "1")) + getWidth(element.children(".operator"));
@@ -122,7 +135,22 @@ function getHeight(element)
 {
     var height = 0;
     
-    if(element.hasClass("operatorSum"))
+    if(element.attr("id") == "equation")
+    {
+        var tempHeight = 0;
+        
+        element.children().each(
+            function(index){
+                tempHeight = getHeight($(this));
+                
+                if(tempHeight > height)
+                {
+                    height = tempHeight;
+                }
+            }
+        );
+    }
+    else if(element.hasClass("operatorSum"))
     {
         height = Math.max(
             element.children(".parameterSum1").eq(0).offset().top - element.children(".parameterSum2").eq(0).offset().top + getHeight(element.children(".parameterSum1").eq(0)),
@@ -160,6 +188,11 @@ function getHeight(element)
         var className = element[0].className
         var startIndex = className.indexOf("operator") + "operator".length;
         var stopIndex = className.indexOf(" ", startIndex);
+        if(stopIndex < 0)
+        {
+            stopIndex = className.length;
+        }
+        
         var operatorType = className.substring(startIndex, stopIndex);
         
         height = Math.max(
@@ -183,14 +216,14 @@ function getParentOffset(element)
     // "position" attribute has a value of "relative" or "absolute" because the "absolute"
     // positioning of the original element is actually relative to this container
     
-    var parentOffsetFilterText = "[class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], #container";
+    var parentOffsetFilterText = "[class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], #container, #equation, #history";
     var left = 0;
     var top = 0;
     
     if(element.parents(parentOffsetFilterText).size() > 0)
     {
-        left = element.parents(parentOffsetFilterText).eq(0).offset().left;
-        top = element.parents(parentOffsetFilterText).eq(0).offset().top;
+        left = element.parents(parentOffsetFilterText).eq(0).offset().left - element.parents(parentOffsetFilterText).eq(0).scrollLeft();
+        top = element.parents(parentOffsetFilterText).eq(0).offset().top - element.parents(parentOffsetFilterText).eq(0).scrollTop();
     }
     
     return {left: left, top: top};
@@ -239,6 +272,7 @@ function populateVariableList(list, element, xml)
                 xml.find("[index='" + parseIndex(id) + "']").attr("type", newValue);
                 
                 displayEquation(XMLtoString(xml[0]));
+                displayHistory(prevtrees);
                 postProcessing();
                 finalize();
             }
@@ -263,7 +297,33 @@ function populateVariableList(list, element, xml)
     
 }
 
-function displayEquation(xml)
+function displayHistory(trees)
+{
+    var output = "";
+    
+    for(h = 0; h < trees.length; h++)
+    {
+        output += generateEquationDisplay(trees[h].genXML(), true) + "<br />";
+    }
+    
+    var bottom = getHeight($("#equation")) + 20;
+    //var top = Math.max($(window).height() - bottom - $("#history").attr("scrollHeight"), 15);
+    
+    var width = getWidth($("#equation")) * 1.5;
+    
+    //console.log(top);
+    
+    $("#history").css({"bottom": bottom + "px", "width": width + "px"/*, "top": top + "px"*/}).html(output)
+    
+    // Make these equaitions static
+    $("#history").find(".clickable").removeAttr("id").removeClass("clickable").addClass("historyElement");
+    $("#history").find(".operator").removeClass("operator").addClass("historyOperator");
+    
+    // Auto-scroll to the bottom of the history window
+    $("#history").scrollTop($("#history").attr("scrollHeight"));
+}
+
+function generateEquationDisplay(xml)
 {
     var $xml = $($.parseXML(xml));
     
@@ -274,9 +334,16 @@ function displayEquation(xml)
         output += elementToHtml($xml.children().eq(i));
     }
     
+    return output;
+}
+
+function displayEquation(xml)
+{
+    var $xml = $($.parseXML(xml));
+    
     if(!errorOccurred)
     {
-        $("#equation").html(output);
+        $("#equation").html(generateEquationDisplay(xml));
         
         populateVariableList($("#variableList"), $("#equation"), $xml);
     }
@@ -302,7 +369,7 @@ function displayEquation(xml)
     function findBlockIndex(currentIndex, pageX, pageY)
     {
         // This function returns the index of the block that the cursor or finger is above, or an
-        // empty string ("") if there is no block is under the cursor/finger
+        // empty string ("") if there is no block under the cursor/finger
         
         var blockIndex = "";
         
@@ -502,6 +569,7 @@ function displayEquation(xml)
             if(tree != null)
             {
                 displayEquation(xmlstring);
+                displayHistory(prevtrees);
                 postProcessing();
                 finalize();
             }
@@ -584,7 +652,6 @@ function elementToHtml(element)
             errorOccurred = true;
             
             return "<span class='operator error'>ERROR<\/span>";
-            
         }
         else
         {
@@ -951,7 +1018,7 @@ function postProcess()
 
 function finalize()
 {
-    $(".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower']").reverse().each(
+    $(".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], .historyElement, .historyOperator").reverse().each(
         function(i)
         {
             var tempLeft = $(this).offset().left;

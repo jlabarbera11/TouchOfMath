@@ -22,13 +22,11 @@ body
 
 #equation
 {
-	/*margin-top:20px;*/
 	font-size:40pt;
 	
 	position:absolute;
-	bottom:75px;
+	bottom:100px;
 	width:100%;
-	/*text-align:center;*/
 }
 
 #history
@@ -39,11 +37,9 @@ body
 	
     position:absolute;
     top:15px;
-	bottom:150px;
+	bottom:100px;
 	overflow:auto;
 	width:100%;
-	/*height:20px;*/
-	/*text-align:center;*/
 }
 
 #doBackend, #generate, #postProcessing, #finalize
@@ -55,7 +51,6 @@ body
 {
     position:absolute;
     right:20px;
-    /*bottom:20px;*/
     top:20px;
 }
 
@@ -182,6 +177,12 @@ body
 	background:#000000;
 	width:7px;
 	height:2px;
+}
+
+/*  Line between numerator and denominator within the 'history' container  */
+#history .parameterDivision2
+{
+    background:#808080;
 }
 
 .operatorSum > .operator		/*  Sum operator  */

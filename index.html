@@ -3,6 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>
+        
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link href="style.css" rel="stylesheet" type="text/css" />
         
@@ -18,28 +19,26 @@
         <script type="text/javascript" src="display.js"></script>
         <script type="text/javascript" src="displayTables.js"></script>
         <script type="text/javascript" src="index.js"></script>
+        
     </head>
-    <body>
     
+    <body>
+        
         <div id="container">
+            
             <input type="text" id="equationInput" value="a+b=c" />
             
             <button id="doBackend" class="debugInfo">Backend</button>
-            
             <button id="generate" class="debugInfo">Generate</button>
-            
             <button id="postProcessing" class="debugInfo">Post Processing</button>
-            
             <button id="finalize" class="debugInfo">Finalize</button>
             
             <button id="display">Display</button>
             
-            <input type="checkbox" id="showDebugInfo" /><span class="label">Show Debug Info</span>
+            <input type="checkbox" id="showDebugInfo" style="display:none;" /><span class="label" style="display:none;">Show Debug Info</span>
             
             <div id="history"></div>
-            
             <div id="equation"></div>
-            
             <div id="variableList"></div>
             
             <div id="debug" class="debugInfo"></div>
@@ -47,10 +46,9 @@
             <div id="initial" style="display:none"></div>
             <div id="final" style="display:none"></div>
             
-            
             <span id="license"><a href="LICENSE">License</a></span>
             
         </div>
-    
+        
     </body>
 </html>

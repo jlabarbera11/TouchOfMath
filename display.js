@@ -11,6 +11,11 @@ jQuery.fn.reverse =
         return this.pushStack(this.get().reverse(), arguments);
     };
 
+/*Array.max = function(array)
+{
+    return Math.max.apply(Math, array);
+};*/
+
 function XMLtoString(element)
 {	
     var serialized;
@@ -49,11 +54,7 @@ function parseIndex(value)
 
 function setPosition(element, left, top)
 {
-    //var tempLeft = element.offset().left;
-    //var tempTop = element.offset().top;
-    
-    var tempParentLeft = getParentOffset(element).left;
-    var tempParentTop = getParentOffset(element).top;
+    var parentOffset = getParentOffset(element);
     
     if(element.hasClass("parameterDivision2"))
     {
@@ -63,8 +64,8 @@ function setPosition(element, left, top)
     element.css(
         {
             "position": "absolute",
-            "left": (left - tempParentLeft) + "px",
-            "top": (top - tempParentTop) + "px",
+            "left": (left - parentOffset.left) + "px",
+            "top": (top - parentOffset.top) + "px",
             "z-index": 0
         }
     );
@@ -72,19 +73,42 @@ function setPosition(element, left, top)
 
 function getWidth(element)
 {
-    var width = 0;
+    var width = -1;
     
     if(element.attr("id") == "equation")
     {
-        element.children().each(
-            function(index){
-                width += getWidth($(this));
+        element.children("span").each(
+            // There should only be one equation in the "#equation" div, but in case there are more,
+            // use the width of the widest one
+            function(index)
+            {
+                var elementWidth = getWidth($(this));
+                
+                if(elementWidth > width)
+                {
+                    width = elementWidth;
+                }
+            }
+        );
+    }
+    else if(element.attr("id") == "history")
+    {
+        element.children("span").each(
+            // Use the width of the widest equation
+            function(index)
+            {
+                var elementWidth = getWidth($(this));
+                
+                if(elementWidth > width)
+                {
+                    width = elementWidth;
+                }
             }
         );
     }
     else if(element.hasClass("operatorSum"))
     {
-        width = getWidth(element.children(".operator")) + getWidth(element.children(".parameterSum0").eq(0));
+        width = getWidth(element.children(".operator, .historyOperator")) + getWidth(element.children(".parameterSum0").eq(0));
         
     }
     else if(element.hasClass("operatorDivision"))
@@ -120,7 +144,7 @@ function getWidth(element)
         
         var operatorType = className.substring(startIndex, stopIndex);
         
-        width = getWidth(element.children(".parameter" + operatorType + "0")) + getWidth(element.children(".parameter" + operatorType + "1")) + getWidth(element.children(".operator"));
+        width = getWidth(element.children(".parameter" + operatorType + "0")) + getWidth(element.children(".parameter" + operatorType + "1")) + getWidth(element.children(".operator, .historyOperator"));
         
     }
     else
@@ -133,20 +157,27 @@ function getWidth(element)
 
 function getHeight(element)
 {
-    var height = 0;
+    var height = -1;
     
     if(element.attr("id") == "equation")
     {
-        var tempHeight = 0;
+        height = 0;
         
-        element.children().each(
-            function(index){
-                tempHeight = getHeight($(this));
-                
-                if(tempHeight > height)
-                {
-                    height = tempHeight;
-                }
+        element.children("span").each(
+            function(index)
+            {
+                height += getHeight($(this));
+            }
+        );
+    }
+    else if(element.attr("id") == "history")
+    {
+        height = 0;
+        
+        element.children("span").each(
+            function(index)
+            {
+                height += getHeight($(this));
             }
         );
     }
@@ -198,7 +229,7 @@ function getHeight(element)
         height = Math.max(
             getHeight(element.children(".parameter" + operatorType + "0")),
             getHeight(element.children(".parameter" + operatorType + "1")),
-            getHeight(element.children(".operator"))
+            getHeight(element.children(".operator, .historyOperator"))
         );
         
     }
@@ -208,6 +239,30 @@ function getHeight(element)
     }
     
     return height;
+}
+
+function getMinTop(element)
+{
+    var top;
+    
+    element.find(".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], .historyElement, .historyOperator").each(
+        function(index)
+        {
+            if(index == 0)
+            {
+                top = $(this).offset().top;
+            }
+            else
+            {
+                if($(this).offset().top < top)
+                {
+                    top = $(this).offset().top;
+                }
+            }
+        }
+    );
+    
+    return top;
 }
 
 function getParentOffset(element)
@@ -226,7 +281,7 @@ function getParentOffset(element)
         top = element.parents(parentOffsetFilterText).eq(0).offset().top - element.parents(parentOffsetFilterText).eq(0).scrollTop();
     }
     
-    return {left: left, top: top};
+    return {"left": left, "top": top};
 }
 
 function populateVariableList(list, element, xml)
@@ -286,15 +341,13 @@ function populateVariableList(list, element, xml)
     list.find(".variableListItem > input").keydown(
         function(event)
         {
-            // If the Enter key is presses, act as if the accompanying button was clicked
+            // If the Enter key is pressed, act as if the accompanying button was clicked
             if(event.which == 13)
             {
                 $(this).nextAll(".variableListItem > button").eq(0).click()
             }
         }
     )
-    
-    
 }
 
 function displayHistory(trees)
@@ -306,21 +359,16 @@ function displayHistory(trees)
         output += generateEquationDisplay(trees[h].genXML(), true) + "<br />";
     }
     
-    var bottom = getHeight($("#equation")) + 20;
-    //var top = Math.max($(window).height() - bottom - $("#history").attr("scrollHeight"), 15);
+    // Display history
+    $("#history").html(output);
     
-    var width = getWidth($("#equation")) * 1.5;
-    
-    //console.log(top);
-    
-    $("#history").css({"bottom": bottom + "px", "width": width + "px"/*, "top": top + "px"*/}).html(output)
-    
-    // Make these equaitions static
+    // Make these equations static
     $("#history").find(".clickable").removeAttr("id").removeClass("clickable").addClass("historyElement");
     $("#history").find(".operator").removeClass("operator").addClass("historyOperator");
     
-    // Auto-scroll to the bottom of the history window
-    $("#history").scrollTop($("#history").attr("scrollHeight"));
+    var width = getWidth($("#history")) + 20;
+    
+    $("#history").css({"width": width + "px"});
 }
 
 function generateEquationDisplay(xml)
@@ -452,14 +500,10 @@ function displayEquation(xml)
             if(element)
             {
                 index = parseIndex(element.attr("id"));
-                
-                //$(target).unbind();//"mouseup").unbind("mousemove");
-                //pseudoMouseDown(element[0], pageX, pageY);
             }
             else
             {
                 index = "Invalid: no 'id' attribute";
-                //return;
             }
         }
         
@@ -538,8 +582,10 @@ function displayEquation(xml)
     
     function pseudoMouseUp(target, pageX, pageY)
     {
-        function snapBack(){
-            for(i in oldLeft){
+        function snapBack()
+        {
+            for(i in oldLeft)
+            {
                 $("#" + selector[i]).animate(
                     {
                         "left": (oldLeft[i] - tempParentLeft[i]) + "px",
@@ -830,27 +876,13 @@ function parameterToHtml(element)
     if(content.indexOf(constantCharacterPrefix) > -1)
     {
         eval('content = content.replace(/\\' + constantCharacterPrefix + '/g, "");');
+        
         elementClass += " constant";
-        //element.attr("constant", "true");
     }
     else
     {
         elementClass += " variable";
     }
-    
-    /*if(content.indexOf(specialCharacterPrefix) > -1)
-    {
-        start = content.indexOf(specialCharacterPrefix);
-        
-        if(content.substring(start + 1) in specialCharacters)
-        {
-            content = content.substring(0, start) + specialCharacters[content.substring(start + 1)];
-        }
-        else
-        {
-            eval('content = content.replace(/' + specialCharacterPrefix + '/g, "");');
-        }
-    }*/
     
     if(content.indexOf("_") > -1)           // Subscript (display only)
     {
@@ -942,7 +974,7 @@ function postProcess()
     $(".operatorSum").each(
         function()
         {
-            var tempWidthOperator = $(this).children(".operator").eq(0).outerWidth();
+            var tempWidthOperator = $(this).children(".operator, .historyOperator").eq(0).outerWidth();
             var tempWidth1 = $(this).children(".parameterSum1").eq(0).outerWidth();
             var tempWidth2 = $(this).children(".parameterSum2").eq(0).outerWidth();
             
@@ -1010,8 +1042,6 @@ function postProcess()
         function()
         {
             var tempHeight = getHeight($(this).siblings(".parameterParentheses0"));
-            
-            //$(this).css({/*"height": tempHeight + "px",*/ "font-size": (.7 * tempHeight) + "px"});
         }
     );
 }
@@ -1024,19 +1054,8 @@ function finalize()
             var tempLeft = $(this).offset().left;
             var tempTop = $(this).offset().top;
             
-            //var tempParentLeft = getParentOffset($(this)).left;
-            //var tempParentTop = getParentOffset($(this)).top;
-            
-            //if($(this).hasClass("parameterDivision2")){
-            //    tempTop += getHeight($(this)) / 2;
-            //}
-            
-            //$(this).css({"position": "absolute", "left": (tempLeft - tempParentLeft) + "px", "top": (tempTop - tempParentTop) + "px", "z-index": 0});
-            
-            //alert("about to absolute-position-ize: #" + $(this).attr("id") + "." + $(this).attr("class"));
-            
             setPosition($(this), tempLeft, tempTop);
-            //alert("done. next...");
+            
             $(this).css({"z-index": 0});
         }
     );
@@ -1050,67 +1069,84 @@ function finalize()
             var tempLeft0 = $(this).children(".parameterDivision0").eq(0).offset().left;
             var tempLeft1 = $(this).children(".parameterDivision1").eq(0).offset().left;
             
-            //var tempTop0 = $(this).children(".parameterDivision0").eq(0).offset().top;
-            //var tempTop1 = $(this).children(".parameterDivision1").eq(0).offset().top;
-            
-            // Since both parameterDivision elements have the same parent, we only have to define one
-            // i.e. (tempParentLeft0 = tempParentLeft1 = tempParentLeft) and
-            // (tempParentTop0 = tempParentTop1 = tempParentTop)
-            //var tempParentLeft = getParentOffset($(this).children(".parameterDivision0").eq(0)).left;
-            //var tempParentTop = getParentOffset($(this).children(".parameterDivision0").eq(0)).top;
-            
             if(tempWidth0 > tempWidth1)
             {
-                //$(this).children(".parameterDivision2").eq(0).css(
-                    //{
-                        /*"position": "absolute",
-                        "left": (tempLeft0 - tempParentLeft) + "px",*/
-                        /*"top": (tempTop1 - tempParentTop) + "px",*/
-                        //"width": tempWidth0 + "px"
-                    //}
-                //);
-                
                 setPosition($(this).children(".parameterDivision2").eq(0), tempLeft0);
                 
                 $(this).children(".parameterDivision2").eq(0).css({"width": tempWidth0 + "px"});
             }
             else
             {
-                //$(this).children(".parameterDivision2").eq(0).css(
-                    //{
-                        /*"position": "absolute",
-                        "left": (tempLeft1 - tempParentLeft) + "px",*/
-                        /*"top": (tempTop1 - tempParentTop) + "px",*/
-                        //"width": tempWidth1 + "px"
-                    //}
-                //);
-                
                 setPosition($(this).children(".parameterDivision2").eq(0), tempLeft1);
                 $(this).children(".parameterDivision2").eq(0).css({"width": tempWidth1 + "px"});
             }
         }
     );
     
-    var minTop = $("#equationInput").offset().top + $("#equationInput").outerHeight();
+    var maxBottom = $(window).height() - 5;
     
     $(".clickable, .operator").each(
         function(i)
         {
-            // This checks to make sure nothing is sticking up off the top edge of the page. If an
-            // element is sticking off the top edge of the page, the entire equation is moved down
-            // until it is remedied.
+            // This checks to make sure nothing is sticking down off the bottom edge of the page. If
+            // an element is sticking off the bottom edge of the page, the entire equation is moved
+            // up until it is remedied.
             
-            if($(this).offset().top < minTop)
+            var bottom = $(this).offset().top + getHeight($(this));
+            
+            if(bottom > maxBottom)
             {
-                var tempOffsetTop = minTop - $(this).offset().top;
+                var offsetBottom = maxBottom - bottom;
                 
                 $(".clickable, .operator").each(
                     function(j)        // Shift all elements down
                     {
-                        setPosition($(this), $(this).offset().left, $(this).offset().top + tempOffsetTop);
+                        setPosition($(this), $(this).offset().left, $(this).offset().top + offsetBottom);
                     }
                 );
             }
+        }
+    );
+    
+    // Adjust the history container so it doesn't stick into the equation
+    $("#history").css({"bottom": $(window).height() - getMinTop($("#equation")) + "px"});
+    
+    // Make sure none of the equations are sticking up into the one above it
+    $("#history").children("span").each(
+        function(index)
+        {
+            if(index == 0)
+            {
+                var minTop = $("#history").offset().top - $("#history").scrollTop();
+            }
+            else
+            {
+                var prevSibling = $(this).prevAll("span").eq(0);
+                
+                var minTop = getMinTop(prevSibling) + getHeight(prevSibling);
+            }
+            
+            var parent = $(this);
+            
+            $(this).find(".historyElement, .historyOperator").each(
+                function(i)
+                {
+                    if($(this).offset().top < minTop)
+                    {
+                        var offsetTop = minTop - $(this).offset().top;
+                        
+                        parent.find(".historyElement, .historyOperator").each(
+                            function(j)        // Shift all elements down
+                            {
+                                setPosition($(this), $(this).offset().left, $(this).offset().top + offsetTop);
+                            }
+                        );
+                    }
+                }
+            );
+            
+            // Auto-scroll to the bottom of the history window
+            $("#history").scrollTop($("#history").attr("scrollHeight"));
         }
     );
 }

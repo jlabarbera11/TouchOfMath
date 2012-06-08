@@ -93,7 +93,7 @@ function getWidth(element)
     }
     else if(element.attr("id") == "history")
     {
-        element.children("span").each(
+        element.children("div").children("span").each(
             // Use the width of the widest equation
             function(index)
             {
@@ -245,7 +245,7 @@ function getMinTop(element)
 {
     var top;
     
-    element.find(".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], .historyElement, .historyOperator").each(
+    element.find(".clickable, .operator, .historyElement, .historyOperator").each(
         function(index)
         {
             if(index == 0)
@@ -293,10 +293,12 @@ function populateVariableList(list, element, xml)
     
     for(h = 0; h < variables.length; h++)
     {
-        var regex = /[^0-9]/g;
+        var regex = /^-?[0-9]?(\.[0-9]+)?$/g;       // Matches any number with or without a negative
+                                                    // sign in front and/or with or without a
+                                                    // decimal component
         
         // Don't treat numbers as editable variables
-        if(regex.test(variables.eq(h).html()))
+        if(!regex.test(variables.eq(h).html()))
         {
             output +=   "<div id='" + variableIdPrefix + variables.eq(h).attr("id") + "' class='variableListItem'>" +
                             "<span class='value'>" +
@@ -356,7 +358,7 @@ function displayHistory(trees)
     
     for(h = 0; h < trees.length; h++)
     {
-        output += generateEquationDisplay(trees[h].genXML(), true) + "<br />";
+        output += "<div class='historyEquation'>" + generateEquationDisplay(trees[h].genXML()) + "</div>";
     }
     
     // Display history
@@ -366,7 +368,7 @@ function displayHistory(trees)
     $("#history").find(".clickable").removeAttr("id").removeClass("clickable").addClass("historyElement");
     $("#history").find(".operator").removeClass("operator").addClass("historyOperator");
     
-    var width = getWidth($("#history")) + 20;
+    var width = getWidth($("#history")) + 30;
     
     $("#history").css({"width": width + "px"});
 }
@@ -1078,6 +1080,7 @@ function finalize()
             else
             {
                 setPosition($(this).children(".parameterDivision2").eq(0), tempLeft1);
+                
                 $(this).children(".parameterDivision2").eq(0).css({"width": tempWidth1 + "px"});
             }
         }
@@ -1112,7 +1115,7 @@ function finalize()
     $("#history").css({"bottom": $(window).height() - getMinTop($("#equation")) + "px"});
     
     // Make sure none of the equations are sticking up into the one above it
-    $("#history").children("span").each(
+    $("#history").children("div").children("span").each(
         function(index)
         {
             if(index == 0)
@@ -1121,7 +1124,7 @@ function finalize()
             }
             else
             {
-                var prevSibling = $(this).prevAll("span").eq(0);
+                var prevSibling = $(this).parent().prevAll("div").eq(0).children("span").eq(0);
                 
                 var minTop = getMinTop(prevSibling) + getHeight(prevSibling);
             }
@@ -1144,9 +1147,54 @@ function finalize()
                     }
                 }
             );
-            
-            // Auto-scroll to the bottom of the history window
-            $("#history").scrollTop($("#history").attr("scrollHeight"));
         }
     );
+    
+    // Draw the separation lines
+    $("#history").children("div").each(
+        function(index)
+        {
+            $("#history").append(
+                $("<span />").addClass("historyDivider").css(
+                    {
+                        "width": $("#history").innerWidth() - 25 + "px"
+                    }
+                )
+            );
+            
+            setPosition(
+                $("#history").find(".historyDivider").eq(index),
+                $(this).children("span").eq(0).offset().left,
+                getMinTop($(this).children("span").eq(0)) + getHeight($(this).children("span").eq(0))
+            );
+        }
+    );
+    
+    // If the history container is not overflowing, adjust the top so that the height matches that
+    // of its contents (so that the contents appear directly above the equation)
+    var size = $("#history").children("div").size();
+    
+    if(size > 0)
+    {
+        var top = 30;
+        
+        var height = getMinTop($("#history").children("div").last().children("span").eq(0))
+                        - getMinTop($("#history").children("div").eq(0).children("span").eq(0))
+                        + getHeight($("#history").children("div").last().children("span").eq(0));
+        
+        if(height < getMinTop($("#equation")) - top)
+        {
+            top = getMinTop($("#equation")) - (height + 20);
+        }
+        
+        if(top < 30)
+        {
+            top = 30;
+        }
+        
+        $("#history").css({"top": top + "px"});
+    }
+    
+    // Auto-scroll to the bottom of the history window
+    $("#history").scrollTop($("#history").attr("scrollHeight"));
 }

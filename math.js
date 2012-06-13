@@ -431,7 +431,7 @@ function substituteVar(idx, newval)
         return tree.update();
 }
 
-function undo()
+function treeUndo()
 {
 	if(prevtrees.length == 0)
 		return;

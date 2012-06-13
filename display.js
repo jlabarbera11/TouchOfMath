@@ -352,6 +352,19 @@ function populateVariableList(list, element, xml)
     )
 }
 
+function undo()
+{
+    if(prevtrees.length > 0)
+    {
+        var newElement = treeUndo();
+        
+        displayEquation(newElement);
+        displayHistory(prevtrees);
+        postProcessing();
+        finalize();
+    }
+}
+
 function displayHistory(trees)
 {
     var output = "";

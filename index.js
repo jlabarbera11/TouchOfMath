@@ -76,6 +76,13 @@ $(document).ready(function()
         }
     );
     
+    $("#undo").click(
+        function()
+        {
+            undo();
+        }
+    );
+    
     $("#showDebugInfo").click(
         function()
         {

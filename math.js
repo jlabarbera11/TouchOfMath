@@ -89,8 +89,8 @@ function findm(b,a)
 //r is index of term immediately right
 function down(idx)
 {
-	if(document.getElementById("final").innerHTML.length)
-		document.getElementById("initial").innerHTML = document.getElementById("final").innerHTML;
+	/*if(document.getElementById("final").innerHTML.length)
+		document.getElementById("initial").innerHTML = document.getElementById("final").innerHTML;*/
 	touchcount++;
 	
 	var t = Math.floor(idx/100);
@@ -113,7 +113,7 @@ function down(idx)
 	//will eventually be
 	//return tree.getMoving(targetm[t], 0, lshift);
 	var xmlstring = tree.getMoving(targetm[t], 0, lshift);
-	document.getElementById("log").innerHTML += ("moving :<br/>" + sanitize(xmlstring).replace(/\n/g, "<br />") + "<br/>");
+	//document.getElementById("log").innerHTML += ("moving :<br/>" + sanitize(xmlstring).replace(/\n/g, "<br />") + "<br/>");
 	return xmlstring;
 }
 
@@ -211,7 +211,7 @@ function up(idx, des)
 	//will eventually be
 	//return tree.update();
 	var xmlstring = tree.update();
-	document.getElementById("final").innerHTML = sanitize(xmlstring).replace(/\n/g, "<br />");
+	//document.getElementById("final").innerHTML = sanitize(xmlstring).replace(/\n/g, "<br />");
 	return xmlstring;
 }
 
@@ -435,7 +435,22 @@ function treeUndo()
 {
 	if(prevtrees.length == 0)
 		return;
+	
+	nexttrees.push(tree);
+	
 	tree = prevtrees.pop();
+	
+	return tree.update();
+}
+
+function treeRedo()
+{
+	if(nexttrees.length == 0)
+		return;
+	
+	prevtrees.push(tree);
+	
+	tree = nexttrees.pop();
 	
 	return tree.update();
 }

@@ -365,6 +365,19 @@ function undo()
     }
 }
 
+function redo()
+{
+    if(nexttrees.length > 0)
+    {
+        var newElement = treeRedo();
+        
+        displayEquation(newElement);
+        displayHistory(prevtrees);
+        postProcessing();
+        finalize();
+    }
+}
+
 function displayHistory(trees)
 {
     var output = "";
@@ -621,6 +634,8 @@ function displayEquation(xml)
         
         if(overIndex != "" && index != overIndex)
         {
+            nexttrees = [];
+            
             xmlstring = up(index, overIndex);
             
             console.log(xmlstring);
@@ -636,7 +651,7 @@ function displayEquation(xml)
             }
             else
             {
-                alert("Tree is null");
+                alert("Error: Tree is null");
             }
         }
         else

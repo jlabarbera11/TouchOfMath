@@ -15,9 +15,32 @@ $(document).ready(function()
                     
                     switch(event.which)
                     {
-                        case 90:
+                        case 90:    // 'Z' key
                             event.preventDefault();
-                            undo();
+                            
+                            if(event.shiftKey)
+                            {
+                                redo();
+                            }
+                            else
+                            {
+                                undo();
+                            }
+                            
+                            break;
+                        
+                        case 89:    // 'Y' key
+                            event.preventDefault();
+                            
+                            if(event.shiftKey)
+                            {
+                                // Do nothing
+                            }
+                            else
+                            {
+                                redo();
+                            }
+                            
                             break;
                     }
                 }
@@ -100,6 +123,7 @@ $(document).ready(function()
                 )
                 {
                     prevtrees = [];
+                    nexttrees = [];
                     
                     displayEquation(xmlstring);
                     displayHistory(prevtrees);
@@ -118,6 +142,13 @@ $(document).ready(function()
         function()
         {
             undo();
+        }
+    );
+    
+    $("#redo").click(
+        function()
+        {
+            redo();
         }
     );
     

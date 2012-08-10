@@ -1,5 +1,6 @@
 var tree;
 var prevtrees = [];
+var nexttrees = [];
 
 function node()
 {

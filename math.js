@@ -425,6 +425,8 @@ function substituteVar(idx, newval)
 {
     save_prev();
     
+    nexttrees = [];
+    
 	var t = Math.floor(idx/100);
         findnodebyindex(tree.root, t).value = newval;
 

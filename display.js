@@ -108,7 +108,8 @@ function getWidth(element)
     }
     else if(element.hasClass("operatorSum"))
     {
-        width = getWidth(element.children(".operator, .historyOperator")) + getWidth(element.children(".parameterSum0").eq(0));
+        width = getWidth(element.children(".operator, .historyOperator")) +
+                getWidth(element.children(".parameterSum0").eq(0));
         
     }
     else if(element.hasClass("operatorDivision"))
@@ -129,7 +130,9 @@ function getWidth(element)
     }
     else if(element.hasClass("operatorParentheses"))
     {
-        width = getWidth(element.children(".parameterParentheses1")) + getWidth(element.children(".parameterParentheses0")) + getWidth(element.children(".parameterParentheses2"));
+        width = getWidth(element.children(".parameterParentheses1")) +
+                getWidth(element.children(".parameterParentheses0")) +
+                getWidth(element.children(".parameterParentheses2"));
         
     }
     else if(element.not("[class~='operator']").filter("[class*='operator']").size() > 0)
@@ -144,7 +147,9 @@ function getWidth(element)
         
         var operatorType = className.substring(startIndex, stopIndex);
         
-        width = getWidth(element.children(".parameter" + operatorType + "0")) + getWidth(element.children(".parameter" + operatorType + "1")) + getWidth(element.children(".operator, .historyOperator"));
+        width = getWidth(element.children(".parameter" + operatorType + "0")) +
+                getWidth(element.children(".parameter" + operatorType + "1")) +
+                getWidth(element.children(".operator, .historyOperator"));
         
     }
     else
@@ -184,14 +189,18 @@ function getHeight(element)
     else if(element.hasClass("operatorSum"))
     {
         height = Math.max(
-            element.children(".parameterSum1").eq(0).offset().top - element.children(".parameterSum2").eq(0).offset().top + getHeight(element.children(".parameterSum1").eq(0)),
+            element.children(".parameterSum1").eq(0).offset().top -
+            element.children(".parameterSum2").eq(0).offset().top +
+            getHeight(element.children(".parameterSum1").eq(0)),
+            
             getHeight(element.children(".parameterSum0").eq(0))
         );
         
     }
     else if(element.hasClass("operatorDivision"))
     {
-        height = getHeight(element.children(".parameterDivision0")) + getHeight(element.children(".parameterDivision1"));
+        height =    getHeight(element.children(".parameterDivision0")) +
+                    getHeight(element.children(".parameterDivision1"));
         
     }
     else if(element.hasClass("operatorPower"))
@@ -271,14 +280,18 @@ function getParentOffset(element)
     // "position" attribute has a value of "relative" or "absolute" because the "absolute"
     // positioning of the original element is actually relative to this container
     
-    var parentOffsetFilterText = "[class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], #container, #equation, #history";
+    var parentOffsetFilterText =    "[class*='parameterSum'], [class*='parameterDivision'], " +
+                                    "[class*='parameterPower'], #container, #equation, #history";
     var left = 0;
     var top = 0;
     
     if(element.parents(parentOffsetFilterText).size() > 0)
     {
-        left = element.parents(parentOffsetFilterText).eq(0).offset().left - element.parents(parentOffsetFilterText).eq(0).scrollLeft();
-        top = element.parents(parentOffsetFilterText).eq(0).offset().top - element.parents(parentOffsetFilterText).eq(0).scrollTop();
+        left =  element.parents(parentOffsetFilterText).eq(0).offset().left -
+                element.parents(parentOffsetFilterText).eq(0).scrollLeft();
+                
+        top =   element.parents(parentOffsetFilterText).eq(0).offset().top -
+                element.parents(parentOffsetFilterText).eq(0).scrollTop();
     }
     
     return {"left": left, "top": top};
@@ -290,17 +303,22 @@ function populateVariableList(list, element, xml)
     var constants = element.find(".constant");
     
     var output = "";
+    var numVariables = 0;
     
     for(h = 0; h < variables.length; h++)
     {
-        var regex = /^-?[0-9]?(\.[0-9]+)?$/g;       // Matches any number with or without a negative
+        var regex = /^-?[0-9]+(\.[0-9]+)?$/g;       // Matches any number with or without a negative
                                                     // sign in front and/or with or without a
                                                     // decimal component
         
         // Don't treat numbers as editable variables
         if(!regex.test(variables.eq(h).html()))
         {
-            output +=   "<div id='" + variableIdPrefix + variables.eq(h).attr("id") + "' class='variableListItem'>" +
+            numVariables++;
+            
+            output +=   "<div id='" +
+                            variableIdPrefix + variables.eq(h).attr("id") +
+                        "' class='variableListItem'>" +
                             "<span class='value'>" +
                                 variables.eq(h).html() +
                             "<\/span>" +
@@ -311,8 +329,14 @@ function populateVariableList(list, element, xml)
         }
     }
     
-    list.html(output)
-    .find(".variableListItem > button").click(
+    // If there is only one editable variable, then don't allow it to be substituted so that the
+    // expression will be mathematically true (e.g. prevent setting 'a' equal to 2 in 'a+1=2')
+    if(numVariables <= 1)
+    {
+        output = "";
+    }
+    
+    list.html(output).find(".variableListItem > button").click(
         function(event)
         {
             var container = $(event.target).parent();
@@ -384,7 +408,9 @@ function displayHistory(trees)
     
     for(h = 0; h < trees.length; h++)
     {
-        output += "<div class='historyEquation'>" + generateEquationDisplay(trees[h].genXML()) + "</div>";
+        output +=   "<div class='historyEquation'>" +
+                        generateEquationDisplay(trees[h].genXML()) +
+                    "</div>";
     }
     
     // Display history
@@ -425,9 +451,11 @@ function displayEquation(xml)
     }
     else
     {
-        $("#equation").html("<span class='parameterPower1'>An error occurred while parsing the XML<\/span>");
+        $("#equation").html(
+            "<span class='parameterPower1'>An error occurred while parsing the XML<\/span>"
+        );
     }
-    
+
     $("#postProcessing").click(
         function()
         {
@@ -622,7 +650,8 @@ function displayEquation(xml)
                     "fast"
                 );
                 
-                $("#" + selector[i]).clearQueue("fx");      // This stops a weird multiple-mouseup animation
+                // This stops a weird multiple-mouseup animation
+                $("#" + selector[i]).clearQueue("fx");
             }
         }
         
@@ -723,7 +752,11 @@ function elementToHtml(element)
     {
         if(element[0] == undefined)
         {
-            alert("Error Parsing XML: \nNull or undefined element \n(element[0] = undefined in 'elementToHtml()')");
+            alert(
+                "Error Parsing XML: \n" +
+                "Null or undefined element \n" +
+                "(element[0] = undefined in 'elementToHtml()')"
+            );
             
             errorOccurred = true;
             
@@ -745,17 +778,23 @@ function elementToHtml(element)
                 }
                 else
                 {
-                    var elementClass = "operator" + operatorClassNameCharacters[element.attr("type")];
+                    var elementClass =  "operator" +
+                                        operatorClassNameCharacters[element.attr("type")];
                     
                     if(element.parent().eq(0).filter("operator").size() > 0)
                     {
-                        elementClass += " parameter" + operatorClassNameCharacters[element.parent().eq(0).attr("type")] + element.index();
+                        elementClass += " parameter" +
+                                        operatorClassNameCharacters[
+                                            element.parent().eq(0).attr("type")
+                                        ] +
+                                        element.index();
                     }
                 
                     switch(place[element.attr("type")])
                     {
                         case 0:        // Operator before parameters
-                            output = "<span class='" + elementClass + "'>" + operatorToHtml(element);
+                            output =    "<span class='" + elementClass + "'>" +
+                                        operatorToHtml(element);
                             
                             for(i = 0; i < arity[element.attr("type")]; i++)
                             {
@@ -789,7 +828,11 @@ function elementToHtml(element)
                             break;
                         
                         default:
-                            alert("Error parsing XML: \nUnknown Operator \"" + element.attr("type") + "\" \n(No 'place' table entry)");
+                            alert(
+                                "Error parsing XML: \nUnknown Operator \"" +
+                                element.attr("type") +
+                                "\" \n(No 'place' table entry)"
+                            );
                             
                             output = "<span class='operator error'>ERROR<\/span>";
                             errorOccurred = true;
@@ -799,7 +842,11 @@ function elementToHtml(element)
             }
             else if(element.filter("parsererror").size() > 0)
             {
-                alert("Error parsing XML: \n\"parsererror\" generated by '$.parseXML()' in 'displayEquation()' \n(message generated in 'elementToHtml()')");
+                alert(
+                    "Error parsing XML: \n" +
+                    "\"parsererror\" generated by '$.parseXML()' in 'displayEquation()' \n" +
+                    "(message generated in 'elementToHtml()')"
+                );
                 
                 output = "<span class='operator error'>ERROR<\/span>";
                 errorOccurred = true;
@@ -807,7 +854,12 @@ function elementToHtml(element)
             }
             else
             {
-                alert("Error parsing XML: \nUnknown tag \"" + element[0].tagName + "\"\n in 'elementToHtml()'");
+                alert(
+                    "Error parsing XML: \n" +
+                    "Unknown tag \"" +
+                    element[0].tagName +
+                    "\"\n in 'elementToHtml()'"
+                );
                 
                 output = "<span class='operator error'>ERROR<\/span>";
                 
@@ -831,7 +883,9 @@ function specialElementToHtml(element)
     
     if(element.parent().eq(0).filter("operator").size() > 0)
     {
-        elementClass += " parameter" + operatorClassNameCharacters[element.parent().eq(0).attr("type")] + element.index();
+        elementClass += " parameter" +
+                        operatorClassNameCharacters[element.parent().eq(0).attr("type")] +
+                        element.index();
     }
     
     switch(element.attr("type"))
@@ -884,7 +938,11 @@ function specialElementToHtml(element)
                     "UO: \"" + sanitize(element.attr("type")) + "\"" +
                 "<\/span>";
             
-            alert("Error: \nUnimplemented operator \"" + element.attr("type") + "\" \n(Unimplemented case in 'specialElementToHtml()' function)");
+            alert(
+                "Error: \nUnimplemented operator \"" +
+                element.attr("type") +
+                "\" \n(Unimplemented case in 'specialElementToHtml()' function)"
+            );
             errorOccurred = true;
             break;
     }
@@ -898,7 +956,9 @@ function parameterToHtml(element)
     
     if(element.parent().eq(0).filter("operator").size() > 0)
     {
-        elementClass += " parameter" + operatorClassNameCharacters[element.parent().eq(0).attr("type")] + element.index();
+        elementClass += " parameter" +
+                        operatorClassNameCharacters[element.parent().eq(0).attr("type")] +
+                        element.index();
     }
     
     var content = sanitize(element.attr("type"));
@@ -917,7 +977,10 @@ function parameterToHtml(element)
     if(content.indexOf("_") > -1)           // Subscript (display only)
     {
         content = content.split("_");
-        var output = "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>";
+        var output =    "<span " +
+                            "class='" + elementClass +"' " +
+                            "id='" + idPrefix + sanitize(element.attr("index")) + "'" +
+                        ">";
         
         for(i = 0; i < content.length; i += 2)
         {
@@ -927,7 +990,8 @@ function parameterToHtml(element)
                 
                 if(content[i].substring(start + 1) in specialCharacters)
                 {
-                    content[i] = content[i].substring(0, start) + specialCharacters[content[i].substring(start + 1)];
+                    content[i] =    content[i].substring(0, start) +
+                                    specialCharacters[content[i].substring(start + 1)];
                 }
                 else
                 {
@@ -953,7 +1017,8 @@ function parameterToHtml(element)
             
             if(content.substring(start + 1) in specialCharacters)
             {
-                content = content.substring(0, start) + specialCharacters[content.substring(start + 1)];
+                content =   content.substring(0, start) +
+                            specialCharacters[content.substring(start + 1)];
             }
             else
             {
@@ -961,7 +1026,12 @@ function parameterToHtml(element)
             }
         }
         
-        return "<span class='" + elementClass + "' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + content + "<\/span>";
+        return  "<span " +
+                    "class='" + elementClass + "' " +
+                    "id='" + idPrefix + sanitize(element.attr("index")) + "'" +
+                ">" +
+                    content +
+                "<\/span>";
     }
 }
 
@@ -969,13 +1039,28 @@ function operatorToHtml(element)
 {
     if(operatorCharacters[element.attr("type")] == undefined)
     {
-        alert("Error displaying equation: \nUndefined operator \"" + element.attr("type") + "\" \n(No 'operatorCharacters' table entry)");
+        alert(
+            "Error displaying equation: \n" +
+            "Undefined operator \"" +
+            element.attr("type") + "\" \n" +
+            "(No 'operatorCharacters' table entry)"
+        );
         
-        return "<span class='clickable operator' id='" + idPrefix + sanitize(element.attr("index")) + "'>&lt;" + sanitize(element.attr("type")) + "&gt;<\/span>";
+        return  "<span " +
+                    "class='clickable operator' " +
+                    "id='" + idPrefix + sanitize(element.attr("index")) + "'" +
+                ">" +
+                    "&lt;" + sanitize(element.attr("type")) + "&gt;" +
+                "<\/span>";
     }
     else
     {
-        return "<span class='clickable operator' id='" + idPrefix + sanitize(element.attr("index")) + "'>" + operatorCharacters[element.attr("type")] + "<\/span>"
+        return  "<span " +
+                    "class='clickable operator' " +
+                    "id='" + idPrefix + sanitize(element.attr("index")) + "'" +
+                ">" +
+                    operatorCharacters[element.attr("type")] +
+                "<\/span>"
     }
 }
 
@@ -1063,9 +1148,26 @@ function postProcess()
             var tempHeight0 = getHeight($(this).children(".parameterDivision0").eq(0));
             var tempHeight1 = getHeight($(this).children(".parameterDivision1").eq(0));
             
-            $(this).children(".parameterDivision0").eq(0).css({"position": "relative", "top": (-tempHeight0 / 2) + "px"});
-            $(this).children(".parameterDivision1").eq(0).css({"position": "relative", "top": (tempHeight1 / 2) + "px"});
-            $(this).children(".parameterDivision2").eq(0).css({"position": "relative", "top": (0) + "px"});
+            $(this).children(".parameterDivision0").eq(0).css(
+                {
+                        "position": "relative",
+                    "top": (-tempHeight0 / 2) + "px"
+                }
+            );
+            
+            $(this).children(".parameterDivision1").eq(0).css(
+                {
+                    "position": "relative",
+                    "top": (tempHeight1 / 2) + "px"
+                }
+            );
+            
+            $(this).children(".parameterDivision2").eq(0).css(
+                {
+                    "position": "relative",
+                    "top": (0) + "px"
+                }
+            );
         });
     
     $(".parameterParentheses1, .parameterParentheses2").each(
@@ -1078,7 +1180,10 @@ function postProcess()
 
 function finalize()
 {
-    $(".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], [class*='parameterPower'], .historyElement, .historyOperator").reverse().each(
+    $(
+        ".clickable, .operator, [class*='parameterSum'], [class*='parameterDivision'], " +
+        "[class*='parameterPower'], .historyElement, .historyOperator"
+    ).reverse().each(
         function(i)
         {
             var tempLeft = $(this).offset().left;
@@ -1132,7 +1237,11 @@ function finalize()
                 $(".clickable, .operator").each(
                     function(j)        // Shift all elements down
                     {
-                        setPosition($(this), $(this).offset().left, $(this).offset().top + offsetBottom);
+                        setPosition(
+                            $(this),
+                            $(this).offset().left,
+                            $(this).offset().top + offsetBottom
+                        );
                     }
                 );
             }
@@ -1169,7 +1278,11 @@ function finalize()
                         parent.find(".historyElement, .historyOperator").each(
                             function(j)        // Shift all elements down
                             {
-                                setPosition($(this), $(this).offset().left, $(this).offset().top + offsetTop);
+                                setPosition(
+                                    $(this),
+                                    $(this).offset().left,
+                                    $(this).offset().top + offsetTop
+                                );
                             }
                         );
                     }
@@ -1193,7 +1306,10 @@ function finalize()
             setPosition(
                 $("#history").find(".historyDivider").eq(index),
                 $(this).children("span").eq(0).offset().left,
-                getMinTop($(this).children("span").eq(0)) + getHeight($(this).children("span").eq(0))
+                getMinTop(
+                    $(this).children("span").eq(0)) +
+                    getHeight($(this).children("span").eq(0)
+                )
             );
         }
     );

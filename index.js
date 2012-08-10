@@ -3,11 +3,30 @@ var xmlstring = null;
 
 $(document).ready(function()
 {
+    function doBackend()
+    {
+        input = $("#equationInput").attr("value");
+        input = parse_input(input);
+        
+        tree = new mathTree();
+        xmlstring = tree.buildTree(input);
+        
+        $("#debug").html(sanitize(xmlstring).replace(/\n/g, "<br />"));
+    }
+
     $(document).keydown(
         function(event)
         {
             // Only capture keyboard shortcuts if we are not in a text field
-            if(!(event.target.tagName.toLowerCase() == "textarea" || (event.target.tagName.toLowerCase() == "input" && $(event.target).attr("type") == "text")))
+            if(
+                !(
+                    event.target.tagName.toLowerCase() == "textarea" ||
+                    (
+                        event.target.tagName.toLowerCase() == "input" &&
+                        $(event.target).attr("type") == "text"
+                    )
+                )
+            )
             {
                 if(event.ctrlKey)
                 {
@@ -71,20 +90,11 @@ $(document).ready(function()
     
     $("#equationInput").focus();
     
-    $("#doBackend").click(
-        function()
-        {
-            input = $("#equationInput").attr("value");
-            input = parse_input(input);
-            
-            tree = new mathTree();
-            xmlstring = tree.buildTree(input);
-            
-            $("#debug").html(sanitize(xmlstring).replace(/\n/g, "<br />"));
-        }
-    );
+    /*$("#doBackend").click(
+        doBackend()
+    );*/
     
-    $("#generate").click(
+    /*$("#generate").click(
         function()
         {
             errorOccurred = false;
@@ -98,19 +108,21 @@ $(document).ready(function()
                 alert("Error: Tree is null");
             }
         }
-    );
+    );*/
     
     $("#display").click(
         function()
         {
-            $("#doBackend").click();
+            //$("#doBackend").click();
+            doBackend();
             
             errorOccurred = false;
             
             // Make sure a tree or math error has not occurred
             if(tree != null)
             {
-                // Check if the current expression's history (if it exists) needs to be removed before generating the new expression
+                // Check if the current expression's history (if it exists) needs to be removed
+                // before generating the new expression
                 if(
                     prevtrees.length == 0 ||
                     (
@@ -152,7 +164,7 @@ $(document).ready(function()
         }
     );
     
-    $("#showDebugInfo").click(
+    /*$("#showDebugInfo").click(
         function()
         {
             if(this.checked)
@@ -166,5 +178,5 @@ $(document).ready(function()
         }
     )
     .click()
-    [0].checked = false;
+    [0].checked = false;*/
 });
